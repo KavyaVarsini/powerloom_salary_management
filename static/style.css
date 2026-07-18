@@ -575,3 +575,193 @@ tbody tr:hover {
     background-color: var(--secondary);
     color: white;
 }
+
+/* ==========================================================================
+   UI / UX ENHANCEMENTS & DARK THEME OVERRIDES
+   ========================================================================== */
+
+/* Theme Transitions */
+body, .sidebar, .navbar, .kpi-card, .dashboard-card, table, th, td, input, select, textarea, button {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+/* Dark Theme Variables */
+body.dark-theme {
+    --bg-main: #0d1214;
+    --card-bg: #141b1e;
+    --text-main: #e2ebed;
+    --text-muted: #839799;
+    --border-color: #242f33;
+    
+    --primary: #156269;
+    --primary-hover: #1b7a82;
+    --secondary: #218794;
+}
+
+body.dark-theme .navbar {
+    background: linear-gradient(135deg, #072224 0%, #0d3b40 100%);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+body.dark-theme .sidebar {
+    background: linear-gradient(180deg, #0c3338 0%, #061e21 100%);
+}
+
+body.dark-theme .sidebar a {
+    color: #b5c7c9;
+}
+
+body.dark-theme .sidebar a:hover, body.dark-theme .sidebar a.active {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+}
+
+body.dark-theme input, body.dark-theme select, body.dark-theme textarea {
+    background-color: #1a2427;
+    color: #ffffff;
+    border-color: #2b3a3e;
+}
+
+body.dark-theme .dataTable-pagination li a {
+    background-color: #1a2427;
+    color: #e2ebed;
+}
+
+body.dark-theme .dataTable-input {
+    border-color: #2b3a3e;
+}
+
+/* Theme Toggle Button Styles */
+.theme-toggle-container {
+    padding: 15px 10px;
+    margin-top: auto;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.theme-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #e5f0f1;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+body.dark-theme .theme-toggle-btn {
+    background-color: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.theme-toggle-btn:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+/* KPI Card & Dashboard Card Lifts */
+.kpi-card:hover, .dashboard-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+}
+
+body.dark-theme .kpi-card:hover, body.dark-theme .dashboard-card:hover {
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}
+
+/* Sidebar Active States */
+.sidebar a {
+    position: relative;
+    overflow: hidden;
+}
+
+.sidebar a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background-color: var(--accent);
+    transform: scaleY(0);
+    transition: transform 0.2s ease;
+}
+
+.sidebar a.active::after {
+    transform: scaleY(1);
+}
+
+/* Skeleton Loading Shimmer */
+.skeleton-loader {
+    width: 100%;
+    height: 40px;
+    background: linear-gradient(90deg, var(--border-color) 25%, var(--bg-main) 50%, var(--border-color) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 6px;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Pulse Animation for Alerts */
+.pulse-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background-color: #d9534f;
+    border-radius: 50%;
+    margin-right: 8px;
+    box-shadow: 0 0 0 0 rgba(217, 83, 79, 0.7);
+    animation: pulse 1.6s infinite;
+    vertical-align: middle;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(217, 83, 79, 0.7);
+    }
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 8px rgba(217, 83, 79, 0);
+    }
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(217, 83, 79, 0);
+    }
+}
+
+/* KPI Card Icon Alignment */
+.kpi-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.kpi-card-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.kpi-card-icon {
+    font-size: 28px;
+    color: var(--secondary);
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+}
+
+.kpi-card:hover .kpi-card-icon {
+    opacity: 1;
+}

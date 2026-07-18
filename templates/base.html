@@ -7,6 +7,15 @@
     <!-- jsPDF & AutoTable CDNs for client-side PDF exports -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.6.0/jspdf.plugin.autotable.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark-theme');
+            document.addEventListener('DOMContentLoaded', () => {
+                document.body.classList.add('dark-theme');
+            });
+        }
+    </script>
 </head>
 <body>
 
@@ -62,6 +71,12 @@
             <a href="/analytics">Analytics</a>           
             {% endif %}
             
+            <div class="theme-toggle-container">
+                <button onclick="toggleTheme()" class="theme-toggle-btn">
+                    <i class="fa-solid fa-moon" id="theme-icon"></i> <span id="theme-text">Dark Mode</span>
+                </button>
+            </div>
+            
             <a href="/logout" class="logout">Logout</a>
         </div>
         <!-- DELETE CONFIRMATION MODAL -->
@@ -105,6 +120,7 @@
                 const href = link.getAttribute("href");
                 if (currentPath === href) {
                     link.classList.add("active-link");
+                    link.classList.add("active");
                 }
             });
 
@@ -120,6 +136,34 @@
                 }
             });
         });
+
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('theme-icon');
+            const themeText = document.getElementById('theme-text');
+            
+            body.classList.toggle('dark-theme');
+            
+            if (body.classList.contains('dark-theme')) {
+                localStorage.setItem('theme', 'dark');
+                themeIcon.className = 'fa-solid fa-sun';
+                themeText.innerText = 'Light Mode';
+            } else {
+                localStorage.setItem('theme', 'light');
+                themeIcon.className = 'fa-solid fa-moon';
+                themeText.innerText = 'Dark Mode';
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeIcon = document.getElementById('theme-icon');
+            const themeText = document.getElementById('theme-text');
+            if (document.body.classList.contains('dark-theme') && themeIcon && themeText) {
+                themeIcon.className = 'fa-solid fa-sun';
+                themeText.innerText = 'Light Mode';
+            }
+        });
+
 
         window.exportTableToPDF = function(tableId, title, filename) {
             const { jsPDF } = window.jspdf;

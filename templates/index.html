@@ -7,28 +7,43 @@
 <div class="kpi-container">
 
     <div class="kpi-card">
-        <h3>Total Workers</h3>
-        <p>{{ total_workers }}</p>
+        <div class="kpi-card-content">
+            <h3>Total Workers</h3>
+            <p>{{ total_workers }}</p>
+        </div>
+        <i class="fa-solid fa-users kpi-card-icon"></i>
     </div>
 
     <div class="kpi-card">
-        <h3>Active Workers</h3>
-        <p>{{ active_workers }}</p>
+        <div class="kpi-card-content">
+            <h3>Active Workers</h3>
+            <p>{{ active_workers }}</p>
+        </div>
+        <i class="fa-solid fa-user-check kpi-card-icon"></i>
     </div>
 
     <div class="kpi-card">
-        <h3>Today's Meters Weaved</h3>
-        <p>{{ today_production }}</p>
+        <div class="kpi-card-content">
+            <h3>Today's Meters Weaved</h3>
+            <p>{{ today_production }}</p>
+        </div>
+        <i class="fa-solid fa-scroll kpi-card-icon"></i>
     </div>
 
     <div class="kpi-card">
-        <h3>This Week Meters Weaved</h3>
-        <p>{{ week_production }}</p>
+        <div class="kpi-card-content">
+            <h3>This Week Meters Weaved</h3>
+            <p>{{ week_production }}</p>
+        </div>
+        <i class="fa-solid fa-calendar-week kpi-card-icon"></i>
     </div>
 
     <div class="kpi-card highlight">
-        <h3>This Week Salary</h3>
-        <p>₹ {{ week_salary }}</p>
+        <div class="kpi-card-content">
+            <h3>This Week Salary</h3>
+            <p>₹ {{ week_salary }}</p>
+        </div>
+        <i class="fa-solid fa-indian-rupee-sign kpi-card-icon" style="color: white; opacity: 0.8;"></i>
     </div>
 
 </div>
@@ -52,19 +67,23 @@
     <div class="dashboard-card" style="margin-bottom: 0; padding: 20px; display: flex; flex-direction: column;">
         <h3 style="font-size: 15px; font-weight: 600; color: #104f55; margin-bottom: 12px;">Production Alerts</h3>
         <div style="flex: 1; overflow-y: auto;">
+            <div id="ml-alerts-skeleton" class="skeleton-loader" style="margin-bottom: 10px;"></div>
             {% if alert_workers and alert_workers|length > 0 %}
                 <ul style="color:#dc3545; font-weight:600; list-style: none; padding-left: 0;">
                     {% for worker in alert_workers %}
                         <li style="margin-bottom: 8px; font-size: 14px;">
-                            ⚠ {{ worker[0] }} produced only {{ worker[1] }} m today
+                            <span class="pulse-dot"></span> {{ worker[0] }} produced only {{ worker[1] }} m today
                         </li>
                     {% endfor %}
                 </ul>
             {% else %}
-                <p style="color:#198754; font-weight:600; font-size: 14px;">
+                <p id="no-alerts-msg" style="color:#198754; font-weight:600; font-size: 14px; display: none;">
                     ✅ No production issues detected today
                 </p>
             {% endif %}
+            
+            <ul id="ml-loom-alerts-list" style="color:#d9534f; font-weight:600; list-style: none; padding-left: 0; display: none;">
+            </ul>
         </div>
     </div>
 
@@ -107,6 +126,52 @@ new Chart(document.getElementById("weeklyChart"), {
         maintainAspectRatio: false
     }
 });
+
+// Fetch ML Loom Alerts
+fetch('/api/loom_alerts')
+    .then(response => response.json())
+    .then(data => {
+        const skeleton = document.getElementById('ml-alerts-skeleton');
+        if (skeleton) skeleton.style.display = 'none';
+
+        const noAlertsMsg = document.getElementById('no-alerts-msg');
+        let hasMLAlerts = data.anomalous_looms && data.anomalous_looms.length > 0;
+        
+        // If there are no regular alerts and no ML alerts, show the "No issues" text
+        const hasRegularAlerts = {% if alert_workers and alert_workers|length > 0 %}true{% else %}false{% endif %};
+        
+        if (!hasMLAlerts && !hasRegularAlerts && noAlertsMsg) {
+            noAlertsMsg.style.display = 'block';
+        }
+
+        if (hasMLAlerts) {
+            const list = document.getElementById('ml-loom-alerts-list');
+            if (noAlertsMsg) {
+                noAlertsMsg.style.display = 'none';
+            }
+            
+            data.anomalous_looms.forEach(loom => {
+                const li = document.createElement('li');
+                li.style.marginBottom = '8px';
+                li.style.fontSize = '14px';
+                li.innerHTML = `<span class="pulse-dot"></span> Loom ${loom} has anomalous low output (ML Predictive Maintenance Alert)`;
+                list.appendChild(li);
+            });
+            list.style.display = 'block';
+        }
+    })
+    .catch(err => {
+        console.error("Error fetching ML alerts", err);
+        const skeleton = document.getElementById('ml-alerts-skeleton');
+        if (skeleton) skeleton.style.display = 'none';
+        
+        const noAlertsMsg = document.getElementById('no-alerts-msg');
+        const hasRegularAlerts = {% if alert_workers and alert_workers|length > 0 %}true{% else %}false{% endif %};
+        if (!hasRegularAlerts && noAlertsMsg) {
+            noAlertsMsg.style.display = 'block';
+        }
+    });
+
 </script>
 
 {% endblock %}
