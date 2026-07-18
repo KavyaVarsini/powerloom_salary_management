@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Manage Loans & Salary Advances</h2>
+
+<style>
+.toggle-section button.toggle-btn {
+    background: none;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    font-family: inherit;
+}
+.toggle-section button.active-toggle {
+    background-color: white !important;
+}
+</style>
+
+<!-- TWO COLUMNS OF FORMS -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 20px; margin-bottom: 30px;">
+    
+    <!-- ISSUE LOAN CARD -->
+    <div class="form-card" style="max-width: 100%; margin-bottom: 0; padding: 20px 24px;">
+        <h3 style="font-size: 16px; font-weight: 600; color: #104f55; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">Issue Salary Advance / Loan</h3>
+        <form method="POST" action="/loans/issue">
+            <div style="display: flex; flex-direction: row; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+                <div class="form-row" style="margin-bottom: 0; min-width: 150px; flex: 1;">
+                    <label style="font-size: 12px; font-weight: bold; color: #1b6f7a;">Worker</label>
+                    <select name="worker_name" required style="margin-top: 5px; padding: 8px;">
+                        <option value="" disabled selected>Select Worker</option>
+                        {% for worker in workers %}
+                        <option value="{{ worker[0] }}">{{ worker[0] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-row" style="margin-bottom: 0; min-width: 110px; flex: 1;">
+                    <label style="font-size: 12px; font-weight: bold; color: #1b6f7a;">Amount (₹)</label>
+                    <input type="number" name="amount" min="1" required style="margin-top: 5px; padding: 8px;">
+                </div>
+                
+                <div class="form-row" style="margin-bottom: 0; min-width: 130px; flex: 1;">
+                    <label style="font-size: 12px; font-weight: bold; color: #1b6f7a;">Date</label>
+                    <input type="date" name="date" value="{{ today_date }}" required style="margin-top: 5px; padding: 8px;">
+                </div>
+            </div>
+            
+            <div class="form-row" style="margin-top: 15px; margin-bottom: 15px;">
+                <label style="font-size: 12px; font-weight: bold; color: #1b6f7a;">Description / Note</label>
+                <input type="text" name="description" placeholder="e.g. Festival advance, medical reasons" style="margin-top: 5px; padding: 8px;">
+            </div>
+            
+            <button type="submit" class="main-btn" style="width: 100%; padding: 10px; font-weight: bold;">Issue Loan</button>
+        </form>
+    </div>
+
+    <!-- RECORD REPAYMENT CARD -->
+    <div class="form-card" style="max-width: 100%; margin-bottom: 0; padding: 20px 24px;">
+        <h3 style="font-size: 16px; font-weight: 600; color: #104f55; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">Record Direct Cash Repayment</h3>
+        <form method="POST" action="/loans/repay">
+            <div style="display: flex; flex-direction: row; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+                <div class="form-row" style="margin-bottom: 0; min-width: 150px; flex: 1;">
+                    <label style="font-size: 12px; font-weight: bold; color: #1b6f7a;">Worker</label>
+                    <select name="worker_name" required style="margin-top: 5px; padding: 8px;">
+                        <option value="" disabled selected>Select Worker</option>
+                        {% for w_loan in workers_with_loans %}
+                        <option value="{{ w_loan[0] }}">{{ w_loan[0] }} (Owes ₹{{ w_loan[1] }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-row" style="margin-bottom: 0; min-width: 110px; flex: 1;">
+                    <label style="font-size: 12px; font-weight: bold; color: #1b6f7a;">Amount (₹)</label>
+                    <input type="number" name="amount" min="1" required style="margin-top: 5px; padding: 8px;">
+                </div>
+                
+                <div class="form-row" style="margin-bottom: 0; min-width: 130px; flex: 1;">
+                    <label style="font-size: 12px; font-weight: bold; color: #1b6f7a;">Repayment Date</label>
+                    <input type="date" name="date" value="{{ today_date }}" required style="margin-top: 5px; padding: 8px;">
+                </div>
+            </div>
+            
+            <div class="form-row" style="margin-top: 15px; margin-bottom: 15px;">
+                <label style="font-size: 12px; font-weight: bold; color: #1b6f7a;">Notes</label>
+                <input type="text" name="notes" placeholder="e.g. Returned cash directly to office" style="margin-top: 5px; padding: 8px;">
+            </div>
+            
+            <button type="submit" class="salary-btn" style="width: 100%; padding: 10px; font-weight: bold; background-color: var(--secondary);">Record Repayment</button>
+        </form>
+    </div>
+
+</div>
+
+<!-- DATA TABS SECTION -->
+<div class="toggle-section" style="margin-bottom: 20px;">
+    <button class="toggle-btn active-toggle" onclick="switchTab('active-loans-tab', this)">Active Loans</button>
+    <button class="toggle-btn" onclick="switchTab('repayment-history-tab', this)">Repayment History</button>
+</div>
+
+<!-- ACTIVE LOANS TABLE -->
+<div id="active-loans-tab" class="table-card">
+    <h3 style="font-size: 16px; font-weight: 600; color: #104f55; margin-bottom: 15px;">Outstanding Advances</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Date Given</th>
+                <th>Worker Name</th>
+                <th>Total Loan (₹)</th>
+                <th>Repaid (₹)</th>
+                <th>Outstanding Balance (₹)</th>
+                <th>Description</th>
+                <th style="text-align: right;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for loan in active_loans %}
+            <tr>
+                <td>{{ loan[3] }}</td>
+                <td><strong>{{ loan[1] }}</strong></td>
+                <td>₹ {{ loan[2] }}</td>
+                <td>₹ {{ loan[5] }}</td>
+                <td style="color: #c0392b; font-weight: 600;">₹ {{ loan[2] - loan[5] }}</td>
+                <td>{{ loan[4] or '-' }}</td>
+                <td style="text-align: right;">
+                    {% if loan[5] == 0 %}
+                    <form method="POST" action="/loans/delete/{{ loan[0] }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this loan?');">
+                        <button type="submit" class="secondary-btn" style="padding: 5px 10px; font-size: 12px; background-color: #fce4e4; color: #c0392b;">Delete</button>
+                    </form>
+                    {% else %}
+                    <span style="font-size: 12px; color: var(--text-muted); font-style: italic;">In Progress</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">No active loans / advances outstanding.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- REPAYMENT HISTORY TABLE -->
+<div id="repayment-history-tab" class="table-card" style="display: none;">
+    <h3 style="font-size: 16px; font-weight: 600; color: #104f55; margin-bottom: 15px;">Repayment Ledger</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Worker Name</th>
+                <th>Repaid Amount (₹)</th>
+                <th>Repayment Type</th>
+                <th>Details / Pay Period</th>
+                <th style="text-align: right;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rep in repayments %}
+            <tr>
+                <td>{{ rep[4] }}</td>
+                <td><strong>{{ rep[2] }}</strong></td>
+                <td style="color: #27ae60; font-weight: 600;">₹ {{ rep[3] }}</td>
+                <td>
+                    {% if rep[5] == 'Salary Deduction' %}
+                    <span style="background-color: #e8f4f4; color: #1b6f7a; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">{{ rep[5] }}</span>
+                    {% else %}
+                    <span style="background-color: #fef5e7; color: #d35400; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">{{ rep[5] }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if rep[5] == 'Salary Deduction' %}
+                    Period: {{ rep[6] }} to {{ rep[7] }}
+                    {% else %}
+                    {{ rep[8] or '-' }}
+                    {% endif %}
+                </td>
+                <td style="text-align: right;">
+                    <form method="POST" action="/loans/repayment/delete/{{ rep[0] }}" style="display: inline;" onsubmit="return confirm('Reverting this repayment will increase the worker\'s debt by ₹{{ rep[3] }}. Proceed?');">
+                        <button type="submit" class="secondary-btn" style="padding: 5px 10px; font-size: 12px; background-color: #fce4e4; color: #c0392b;">Revert</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 30px;">No repayment records found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+function switchTab(tabId, btnElement) {
+    // Hide both tabs
+    document.getElementById('active-loans-tab').style.display = 'none';
+    document.getElementById('repayment-history-tab').style.display = 'none';
+    
+    // Show selected tab
+    document.getElementById(tabId).style.display = 'block';
+    
+    // Toggle active button style
+    const buttons = document.querySelectorAll('.toggle-btn');
+    buttons.forEach(btn => btn.classList.remove('active-toggle'));
+    btnElement.classList.add('active-toggle');
+}
+</script>
+
+{% endblock %}

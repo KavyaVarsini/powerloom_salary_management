@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Jaikrishna Weaving Mills</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/vanilla-datatables@latest/dist/vanilla-dataTables.min.css" rel="stylesheet" type="text/css">
+    <!-- jsPDF & AutoTable CDNs for client-side PDF exports -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.6.0/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+
+    <!-- TOP NAVBAR -->
+    <header class="navbar">
+        <div class="navbar-brand">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
+            <span>Jaikrishna Weaving Mills</span>
+        </div>
+    </header>
+
+    <!-- TOAST POPUP (TOP RIGHT) -->
+    <div class="toast-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="toast toast-{{ category }}">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+    </div>
+
+    <div class="layout">
+
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+
+            <a href="/">Dashboard</a>
+            
+            {% if session.get('role') == 'Admin' %}
+            <a href="/add-worker">Add Worker</a>
+            <a href="/view-workers">View Workers</a>
+
+            <a href="/add-loom">Add Loom</a>
+            <a href="/view-looms">View Looms</a>
+            {% endif %}
+
+            <a href="/daily-entry">Daily Entry</a>
+            
+            {% if session.get('role') == 'Admin' %}
+            <a href="/weekly-salary">Weekly Salary</a>
+            <a href="/loans">Manage Loans</a>
+            <a href="/targets">Manage Targets</a>
+            {% endif %}
+            
+            <a href="/daily-history">Daily History</a>
+            
+            {% if session.get('role') == 'Admin' %}
+            <a href="/worker-production">Production Report</a>
+            <a href="/worker-salary-report">Salary Report</a>
+            <a href="/analytics">Analytics</a>           
+            {% endif %}
+            
+            <a href="/logout" class="logout">Logout</a>
+        </div>
+        <!-- DELETE CONFIRMATION MODAL -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <h3>Confirm Delete</h3>
+        <p>Are you sure you want to delete this record?</p>
+        <div class="modal-buttons">
+            <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+            <a id="confirmDeleteBtn" href="#" class="delete-btn">Delete</a>
+        </div>
+    </div>
+</div>
+
+        <!-- MAIN CONTENT -->
+        <div class="main">
+            {% block content %}{% endblock %}
+        </div>
+
+    </div>
+
+    <!-- AUTO DISMISS SCRIPT -->
+    <script>
+        setTimeout(function() {
+            const toasts = document.querySelectorAll('.toast');
+            toasts.forEach(toast => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 400);
+            });
+        }, 3000);
+    </script>
+
+    <!-- Vanilla DataTables JS CDN & Initialization -->
+    <script src="https://cdn.jsdelivr.net/npm/vanilla-datatables@latest/dist/vanilla-dataTables.min.js" type="text/javascript"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Highlight active sidebar navigation tab
+            const currentPath = window.location.pathname;
+            const sidebarLinks = document.querySelectorAll(".sidebar a");
+            sidebarLinks.forEach(link => {
+                const href = link.getAttribute("href");
+                if (currentPath === href) {
+                    link.classList.add("active-link");
+                }
+            });
+
+            // Initialize vanilla datatables
+            const tables = document.querySelectorAll("table");
+            tables.forEach(table => {
+                if (!table.classList.contains("no-datatable")) {
+                    table.dataTableInstance = new DataTable(table, {
+                        searchable: true,
+                        fixedHeight: false,
+                        perPage: 10
+                    });
+                }
+            });
+        });
+
+        window.exportTableToPDF = function(tableId, title, filename) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Add Title
+            doc.setFontSize(18);
+            doc.setTextColor(31, 111, 115); // Jaikrishna theme color #1f6f73
+            doc.text("JAIKRISHNA WEAVING MILLS", 14, 15);
+            
+            doc.setFontSize(12);
+            doc.setTextColor(100, 100, 100);
+            doc.text(title, 14, 22);
+            
+            doc.setFontSize(10);
+            doc.text("Generated on: " + new Date().toLocaleDateString(), 14, 28);
+            
+            // Find Table
+            const table = document.getElementById(tableId) || document.querySelector("table");
+            if (!table) {
+                alert("No table records found to export.");
+                return;
+            }
+
+            let dtInstance = table.dataTableInstance;
+            let headers = [];
+            let body = [];
+            let actionIndex = -1;
+
+            if (dtInstance) {
+                // Get all column headers and look for Actions column index
+                headers = dtInstance.headings.map((th, idx) => {
+                    let text = th.innerText.trim();
+                    if (text === 'Actions') {
+                        actionIndex = idx;
+                    }
+                    return text;
+                });
+
+                // Check if client-side search is currently active in the datatable wrapper
+                const wrapper = table.closest(".dataTable-wrapper");
+                const searchInput = wrapper ? wrapper.querySelector(".dataTable-input") : null;
+                const isSearching = searchInput && searchInput.value.trim() !== "";
+
+                // Get rows that match the filter (either searched rows or all rows)
+                let rowsToExport = [];
+                if (isSearching && dtInstance.searchData && dtInstance.searchData.length > 0) {
+                    rowsToExport = dtInstance.searchData.map(idx => dtInstance.data[idx]);
+                } else if (isSearching && dtInstance.searchData && dtInstance.searchData.length === 0) {
+                    rowsToExport = []; // Search matched nothing
+                } else {
+                    rowsToExport = dtInstance.data; // No search active, export all table records
+                }
+
+                body = rowsToExport.map(tr => {
+                    return Array.from(tr.cells).map(cell => cell.innerText.trim());
+                });
+            } else {
+                // Fallback for standard tables
+                const thElements = table.querySelectorAll("th");
+                headers = Array.from(thElements).map((th, idx) => {
+                    let text = th.innerText.trim();
+                    if (text === 'Actions') {
+                        actionIndex = idx;
+                    }
+                    return text;
+                });
+
+                const trElements = table.querySelectorAll("tbody tr");
+                body = Array.from(trElements).map(tr => {
+                    return Array.from(tr.cells).map(cell => cell.innerText.trim());
+                });
+            }
+
+            // Strip out Actions column from headers and body row arrays if it exists
+            if (actionIndex !== -1) {
+                headers.splice(actionIndex, 1);
+                body = body.map(row => {
+                    row.splice(actionIndex, 1);
+                    return row;
+                });
+            }
+            
+            // Generate PDF Table
+            doc.autoTable({
+                head: [headers],
+                body: body,
+                startY: 33,
+                theme: 'grid',
+                headStyles: { fillColor: [31, 111, 115] }
+            });
+            
+            doc.save(filename || 'report.pdf');
+        };
+    </script>
+
+</body>
+</html>

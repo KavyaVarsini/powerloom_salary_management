@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Edit Daily Entry</h2>
+
+<div class="form-card">
+    <form method="POST">
+
+        <div class="form-row">
+            <label>Worker</label>
+            <select name="worker_name" required>
+                {% for worker in workers %}
+                <option value="{{ worker[0] }}" {% if worker[0] == record[2] %}selected{% endif %}>{{ worker[0] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-row">
+            <label>Loom</label>
+            <select name="loom_number" required>
+                {% for loom in looms %}
+                <option value="{{ loom[0] }}" {% if loom[0] == record[3] %}selected{% endif %}>{{ loom[0] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-row">
+            <label>Date</label>
+            <input type="date" name="date" value="{{ record[1] }}" required>
+        </div>
+
+        <div class="form-row">
+            <label>Shift</label>
+            <select name="shift" required>
+                <option value="Morning" {% if record[4] == "Morning" %}selected{% endif %}>Morning</option>
+                <option value="Night" {% if record[4] == "Night" %}selected{% endif %}>Night</option>
+            </select>
+        </div>
+
+        <div class="form-row">
+            <label>Meters Weaved</label>
+            <input type="number" name="output" value="{{ record[5] }}" min="0" required>            
+        </div>
+
+        <div class="form-row">
+            <label>Run Time (in hours)</label>
+            <input type="number" step="0.1" name="run_time" value="{{ record[6] }}" min="0" max="24" required>            
+        </div>
+
+        <button type="submit" class="main-btn">Update Entry</button>
+        <a href="/daily-history" class="secondary-btn" style="margin-left: 10px; text-decoration: none; padding: 10px 15px; border-radius: 4px; display: inline-block; vertical-align: middle;">Cancel</a>
+
+    </form>
+</div>
+
+{% endblock %}

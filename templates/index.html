@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Dashboard</h2>
+
+<div class="kpi-container">
+
+    <div class="kpi-card">
+        <h3>Total Workers</h3>
+        <p>{{ total_workers }}</p>
+    </div>
+
+    <div class="kpi-card">
+        <h3>Active Workers</h3>
+        <p>{{ active_workers }}</p>
+    </div>
+
+    <div class="kpi-card">
+        <h3>Today's Meters Weaved</h3>
+        <p>{{ today_production }}</p>
+    </div>
+
+    <div class="kpi-card">
+        <h3>This Week Meters Weaved</h3>
+        <p>{{ week_production }}</p>
+    </div>
+
+    <div class="kpi-card highlight">
+        <h3>This Week Salary</h3>
+        <p>₹ {{ week_salary }}</p>
+    </div>
+
+</div>
+
+
+<!-- ===============================
+     WEEKLY TREND + ALERT SECTION
+================================ -->
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: stretch; margin-bottom: 30px;">
+
+    <!-- Weekly Production Trend -->
+    <div class="dashboard-card" style="margin-bottom: 0; padding: 20px;">
+        <h3 style="font-size: 15px; font-weight: 600; color: #104f55; margin-bottom: 12px;">Last 7 Days Meters Weaved</h3>
+        <div style="height: 180px; position: relative;">
+            <canvas id="weeklyChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Production Alerts -->
+    <div class="dashboard-card" style="margin-bottom: 0; padding: 20px; display: flex; flex-direction: column;">
+        <h3 style="font-size: 15px; font-weight: 600; color: #104f55; margin-bottom: 12px;">Production Alerts</h3>
+        <div style="flex: 1; overflow-y: auto;">
+            {% if alert_workers and alert_workers|length > 0 %}
+                <ul style="color:#dc3545; font-weight:600; list-style: none; padding-left: 0;">
+                    {% for worker in alert_workers %}
+                        <li style="margin-bottom: 8px; font-size: 14px;">
+                            ⚠ {{ worker[0] }} produced only {{ worker[1] }} m today
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p style="color:#198754; font-weight:600; font-size: 14px;">
+                    ✅ No production issues detected today
+                </p>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+
+<!-- ===============================
+     CHART SCRIPT
+================================ -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script id="weekly-data" type="application/json">
+{{ weekly_trend | tojson }}
+</script>
+
+<script>
+const weeklyRaw = JSON.parse(
+    document.getElementById("weekly-data").textContent
+);
+
+const dates = weeklyRaw.map(item => item[0]);
+const values = weeklyRaw.map(item => item[1]);
+
+new Chart(document.getElementById("weeklyChart"), {
+    type: "line",
+    data: {
+        labels: dates,
+        datasets: [{
+            label: "Meters Weaved",
+            data: values,
+            borderColor: "#104f55",
+            backgroundColor: "rgba(16,79,85,0.15)",
+            fill: true,
+            tension: 0.3
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+});
+</script>
+
+{% endblock %}

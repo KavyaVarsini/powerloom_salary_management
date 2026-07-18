@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Workers</h2>
+
+<div class="toggle-section">
+    <a href="/view-workers?status=Active" class="toggle-btn {% if current_status == 'Active' %}active-toggle{% endif %}">
+        Active Workers
+    </a>
+
+    <a href="/view-workers?status=Inactive" class="toggle-btn {% if current_status == 'Inactive' %}active-toggle{% endif %}">
+        Inactive Workers
+    </a>
+</div>
+
+<form method="GET" class="search-form">
+    <input type="hidden" name="status" value="{{ current_status }}">
+
+    <input type="text"
+           name="search"
+           placeholder="Search by name or phone"
+           value="{{ search }}">
+
+    <button type="submit" class="search-btn">Search</button>
+</form>
+
+
+<div class="table-card">
+    <table>
+        <tr>
+            <th>Worker Name</th>
+            <th>Phone</th>
+            <th>Actions</th>
+        </tr>
+
+        {% for worker in workers %}
+        <tr>
+            <td>{{ worker['worker_name'] }}</td>
+            <td>{{ worker['phone'] }}</td>
+            <td class="action-cell">
+
+                <a href="/edit-worker/{{ worker['worker_name'] }}" class="edit-btn">
+                    Edit
+                </a>
+
+                {% if current_status == 'Active' %}
+                    <a href="/deactivate_worker/{{ worker['worker_name'] }}"
+                        class="danger-btn"
+                        onclick="return confirm('Are you sure you want to deactivate this worker?');">
+
+                        Deactivate
+                    </a>
+                {% else %}
+                    <a href="/activate_worker/{{ worker['worker_name'] }}"
+                        class="success-btn"
+                        onclick="return confirm('Are you sure you want to activate this worker?');">
+                        Activate
+                    </a>
+                {% endif %}
+
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+{% endblock %}

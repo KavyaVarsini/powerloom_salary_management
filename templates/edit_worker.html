@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Edit Worker</h2>
+
+<div class="form-card">
+
+    <form method="POST">
+
+        <label>Worker Name</label>
+        <input type="text" name="new_name" value="{{ worker_name }}" required>
+
+        <label>Phone Number</label>
+        <input type="tel" name="phone" value="{{ phone }}" required pattern="[0-9]{10}" title="Phone number must contain exactly 10 digits" maxlength="10">
+
+        <button type="submit" class="primary-btn">
+            Update Worker
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}

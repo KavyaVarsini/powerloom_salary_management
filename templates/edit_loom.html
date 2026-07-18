@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Edit Loom</h2>
+
+<div class="form-card">
+
+    <form method="POST">
+
+        <label>Loom Number</label>
+        <input type="number" name="new_loom" value="{{ loom_number }}" min="1" required>
+
+        <label>Rate Per Unit</label>
+        <input type="number" step="0.01" min="0.01" name="rate" value="{{ rate }}" required>
+
+        <button type="submit" class="primary-btn">
+            Update Loom
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}

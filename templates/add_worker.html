@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Add Worker</h2>
+
+<div class="form-card" style="max-width: 100%; width: auto; display: inline-block;">
+    <form method="POST" style="display: flex; flex-direction: row; gap: 15px; align-items: flex-end; flex-wrap: wrap; background: none; box-shadow: none; padding: 0; max-width: 100%;">
+
+        <div class="form-row" style="margin-bottom: 0; min-width: 200px;">
+            <label style="margin-top: 0; font-size: 14px; font-weight: bold; color: #1b6f7a;">Worker Name</label>
+            <input type="text" name="worker_name" required style="margin-top: 5px; padding: 8px;">
+        </div>
+
+        <div class="form-row" style="margin-bottom: 0; min-width: 180px;">
+            <label style="margin-top: 0; font-size: 14px; font-weight: bold; color: #1b6f7a;">Phone</label>
+            <input type="tel" name="phone" required pattern="[0-9]{10}" title="Phone number must contain exactly 10 digits" maxlength="10" style="margin-top: 5px; padding: 8px;">
+        </div>
+
+        <button type="submit" class="main-btn" style="margin-top: 0; width: auto; padding: 8px 20px; font-weight: bold; height: 38px;">Add Worker</button>
+
+    </form>
+</div>
+
+{% endblock %}

@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+backup/
+*.db
+*.sqlite3
+*.sqbpro

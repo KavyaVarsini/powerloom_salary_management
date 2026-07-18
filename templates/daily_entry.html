@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Daily Entry</h2>
+
+<div class="form-card" style="max-width: 100%; width: auto; display: inline-block;">
+    <form method="POST" style="display: flex; flex-direction: row; gap: 15px; align-items: flex-end; flex-wrap: wrap; background: none; box-shadow: none; padding: 0; max-width: 100%;">
+
+        <div class="form-row" style="margin-bottom: 0; min-width: 150px;">
+            <label style="margin-top: 0; font-size: 14px; font-weight: bold; color: #1b6f7a;">Date</label>
+            <input type="date" name="date" required value="{{ today_date }}" style="margin-top: 5px; padding: 8px;">
+        </div>
+
+        <div class="form-row" style="margin-bottom: 0; min-width: 160px;">
+            <label style="margin-top: 0; font-size: 14px; font-weight: bold; color: #1b6f7a;">Worker</label>
+            <select name="worker_name" required style="margin-top: 5px; padding: 8px;">
+                <option value="" disabled selected>Select Worker</option>
+                {% for worker in workers %}
+                <option value="{{ worker[0] }}">{{ worker[0] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-row" style="margin-bottom: 0; min-width: 120px;">
+            <label style="margin-top: 0; font-size: 14px; font-weight: bold; color: #1b6f7a;">Loom</label>
+            <select name="loom_number" required style="margin-top: 5px; padding: 8px;">
+                <option value="" disabled selected>Select Loom</option>
+                {% for loom in looms %}
+                <option value="{{ loom[0] }}">{{ loom[0] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-row" style="margin-bottom: 0; min-width: 120px;">
+            <label style="margin-top: 0; font-size: 14px; font-weight: bold; color: #1b6f7a;">Shift</label>
+            <select name="shift" required style="margin-top: 5px; padding: 8px;">
+                <option value="Morning">Morning</option>
+                <option value="Night">Night</option>
+            </select>
+        </div>
+
+        <div class="form-row" style="margin-bottom: 0; min-width: 120px;">
+            <label style="margin-top: 0; font-size: 14px; font-weight: bold; color: #1b6f7a;">Meters Weaved</label>
+            <input type="number" name="output" min="0" required style="margin-top: 5px; padding: 8px;">            
+        </div>
+
+        <div class="form-row" style="margin-bottom: 0; min-width: 120px;">
+            <label style="margin-top: 0; font-size: 14px; font-weight: bold; color: #1b6f7a;">Run Time (hours)</label>
+            <input type="number" step="0.1" name="run_time" min="0" max="24" value="12.0" required style="margin-top: 5px; padding: 8px;">            
+        </div>
+
+        <button type="submit" class="main-btn" style="margin-top: 0; width: auto; padding: 8px 20px; font-weight: bold; height: 38px;">Submit Entry</button>
+
+    </form>
+</div>
+
+{% endblock %}

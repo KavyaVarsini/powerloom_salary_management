@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Production Report</h2>
+
+<div class="form-card" style="max-width: 100%; width: auto; display: inline-block;">
+    <form method="POST" style="display: flex; flex-direction: row; gap: 15px; align-items: flex-end; flex-wrap: wrap; background: none; box-shadow: none; padding: 0; max-width: 100%;">
+
+        <div class="form-row" style="margin-bottom: 0; min-width: 180px;">
+            <label style="margin-top: 0; font-size: 14px; font-weight: bold; color: #1b6f7a;">Start Date</label>
+            <input type="date" name="start_date" value="{{ start or '' }}" required style="margin-top: 5px; padding: 8px;">
+        </div>
+
+        <div class="form-row" style="margin-bottom: 0; min-width: 180px;">
+            <label style="margin-top: 0; font-size: 14px; font-weight: bold; color: #1b6f7a;">End Date</label>
+            <input type="date" name="end_date" value="{{ end or '' }}" required style="margin-top: 5px; padding: 8px;">
+        </div>
+
+        <button type="submit" class="main-btn" style="margin-top: 0; width: auto; padding: 8px 20px; font-weight: bold; height: 38px;">Generate Report</button>
+
+        {% if records %}
+        <button type="button" onclick="exportTableToPDF('production-table', 'Worker Production Report ({{ start }} to {{ end }})', 'worker_production_report.pdf')" style="background-color: #e67e22; border-color: #e67e22; color: white; cursor: pointer; padding: 8px 20px; border-radius: 4px; border: none; font-weight: bold; margin-top: 0; height: 38px;">
+            Export PDF
+        </button>
+        {% endif %}
+
+    </form>
+</div>
+
+{% if records %}
+<div class="table-card">
+    <table id="production-table">
+        <tr>
+            <th>Worker</th>
+            <th>Total Meters Weaved</th>
+        </tr>
+
+        {% for r in records %}
+        <tr>
+            <td>{{ r[0] }}</td>
+            <td>{{ r[1] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endif %}
+
+{% endblock %}

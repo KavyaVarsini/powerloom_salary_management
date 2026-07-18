@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salary Payslip - {{ worker_name }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f6fa;
+            color: #2f3640;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .payslip-container {
+            max-width: 800px;
+            background-color: #ffffff;
+            border: 1px solid #dcdde1;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            padding: 40px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #1f6f73;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #1f6f73;
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .header p {
+            margin: 5px 0 0 0;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .title-badge {
+            display: inline-block;
+            background-color: #e8f4f4;
+            color: #1f6f73;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-top: 10px;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 35px;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            border: 1px solid #f1f2f6;
+        }
+
+        .details-col p {
+            margin: 6px 0;
+            font-size: 15px;
+        }
+
+        .details-col strong {
+            color: #353b48;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #f1f2f6;
+        }
+
+        th {
+            background-color: #1f6f73;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            font-size: 14px;
+            color: #2f3640;
+        }
+
+        .total-row {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .total-row td {
+            font-size: 16px;
+            color: #1f6f73;
+            border-top: 2px solid #1f6f73;
+        }
+
+        .signature-section {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 80px;
+            padding-top: 20px;
+        }
+
+        .sig-line {
+            width: 200px;
+            text-align: center;
+            border-top: 1px solid #7f8c8d;
+            font-size: 14px;
+            color: #7f8c8d;
+            padding-top: 8px;
+        }
+
+        .action-bar {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .print-btn {
+            background-color: #1f6f73;
+            color: #ffffff;
+            border: none;
+            padding: 10px 25px;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(31,111,115,0.15);
+            transition: all 0.2s ease-in-out;
+        }
+
+        .print-btn:hover {
+            background-color: #164f52;
+            box-shadow: 0 6px 12px rgba(31,111,115,0.25);
+        }
+
+        /* Print styles */
+        @media print {
+            body {
+                background-color: #ffffff;
+                padding: 0;
+            }
+
+            .payslip-container {
+                border: none;
+                box-shadow: none;
+                padding: 0;
+                max-width: 100%;
+            }
+
+            .action-bar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="action-bar">
+        <button class="print-btn" onclick="window.print()">Print Payslip</button>
+    </div>
+
+    <div class="payslip-container">
+        <div class="header">
+            <h1>JAIKRISHNA WEAVING MILLS</h1>
+            <p>Powerloom Production & Salary Slip</p>
+            <span class="title-badge">Salary Statement</span>
+        </div>
+
+        <div class="details-grid">
+            <div class="details-col">
+                <p><strong>Employee Name:</strong> {{ worker_name }}</p>
+                <p><strong>Department:</strong> Weaving Section</p>
+            </div>
+            <div class="details-col" style="text-align: right;">
+                <p><strong>Pay Period:</strong> {{ start }} to {{ end }}</p>
+                <p><strong>Statement Date:</strong> {{ date }}</p>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Loom No</th>
+                    <th>Meters Weaved</th>
+                    <th>Run Time</th>
+                    <th>Rate/Unit</th>
+                    <th>Daily Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in records %}
+                <tr>
+                    <td>{{ r[0] }}</td>
+                    <td>{{ r[1] }}</td>
+                    <td>{{ r[2] }} meters</td>
+                    <td>{{ r[5] }} hours</td>
+                    <td>₹ {{ r[3] }}</td>
+                    <td>₹ {{ r[4] }}</td>
+                </tr>
+                {% endfor %}
+                <tr class="total-row" style="background-color: transparent; font-weight: normal;">
+                    <td colspan="5" style="text-align: right; border-top: 1.5px solid #dcdde1; padding: 8px 15px;">Gross Production Pay:</td>
+                    <td style="border-top: 1.5px solid #dcdde1; padding: 8px 15px;">₹ {{ total }}</td>
+                </tr>
+                {% if incentive_bonus > 0 %}
+                <tr class="total-row" style="background-color: transparent; font-weight: normal; color: #27ae60;">
+                    <td colspan="5" style="text-align: right; border: none; padding: 6px 15px;">Add: Production Incentive (Met {{ achieved_target_threshold }}m):</td>
+                    <td style="border: none; padding: 6px 15px;">+ ₹ {{ incentive_bonus }}</td>
+                </tr>
+                {% endif %}
+                {% if applied_deduction > 0 %}
+                <tr class="total-row" style="background-color: transparent; font-weight: normal; color: #c0392b;">
+                    <td colspan="5" style="text-align: right; border-bottom: 1.5px solid #dcdde1; padding: 6px 15px;">Less: Advance Deduction:</td>
+                    <td style="border-bottom: 1.5px solid #dcdde1; padding: 6px 15px;">- ₹ {{ applied_deduction }}</td>
+                </tr>
+                {% endif %}
+                <tr class="total-row">
+                    <td colspan="5" style="text-align: right; font-size: 16px; color: #1f6f73; padding: 12px 15px;">Total Net Payable Salary:</td>
+                    <td style="font-size: 16px; color: #1f6f73; padding: 12px 15px;">₹ {{ net_total }}</td>
+                </tr>
+                
+                {% if remaining_balance > 0 %}
+                <tr style="font-style: italic; background-color: #fafbfc;">
+                    <td colspan="5" style="text-align: right; color: #7f8c8d; font-size: 12px; padding: 6px 15px; border: none;">Remaining Outstanding Advance Balance:</td>
+                    <td style="color: #7f8c8d; font-size: 12px; padding: 6px 15px; border: none;">₹ {{ remaining_balance }}</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+
+        <div class="signature-section">
+            <div class="sig-line">
+                Worker Signature
+            </div>
+            <div class="sig-line">
+                Manager/Authorized Signatory
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,21 @@
+<h2>Inactive Workers</h2>
+
+<table border="1">
+    <tr>
+        <th>Name</th>
+        <th>Phone</th>
+        <th>Action</th>
+    </tr>
+
+    {% for worker in workers %}
+    <tr>
+        <td>{{ worker['worker_name'] }}</td>
+        <td>{{ worker['phone'] }}</td>
+        <td>
+            <a href="/activate_worker/{{ worker['worker_name'] }}">
+                <button>Activate</button>
+            </a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Looms</h2>
+
+<div class="toggle-section">
+    <a href="/view-looms?status=Active" class="toggle-btn {% if current_status == 'Active' %}active-toggle{% endif %}">
+        Active Looms
+    </a>
+
+    <a href="/view-looms?status=Inactive" class="toggle-btn {% if current_status == 'Inactive' %}active-toggle{% endif %}">
+        Inactive Looms
+    </a>
+</div>
+
+<div class="table-card">
+    <table>
+        <tr>
+            <th>Loom Number</th>
+            <th>Rate Per Unit</th>
+            <th>Actions</th>
+        </tr>
+
+        {% for loom in looms %}
+        <tr>
+            <td>{{ loom['loom_number'] }}</td>
+            <td>{{ loom['rate_per_unit'] }}</td>
+            <td class="action-cell">
+
+                <a href="/edit-loom/{{ loom['loom_number'] }}" class="edit-btn">
+                    Edit
+                </a>
+
+                {% if current_status == 'Active' %}
+                    <a href="/deactivate_loom/{{ loom['loom_number'] }}"
+                        class="danger-btn"
+                        onclick="return confirm('Are you sure you want to deactivate this loom?');">
+
+                        Deactivate
+                    </a>
+                {% else %}
+                    <a href="/activate_loom/{{ loom['loom_number'] }}"
+                        class="success-btn"
+                        onclick="return confirm('Are you sure you want to activate this loom?');">
+
+                        Activate
+                    </a>
+                {% endif %}
+
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+{% endblock %}
