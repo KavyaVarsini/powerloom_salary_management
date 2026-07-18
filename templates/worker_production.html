@@ -33,12 +33,28 @@
         <tr>
             <th>Worker</th>
             <th>Total Meters Weaved</th>
+            {% if forecasts %}
+            <th>ML Weekly Forecast</th>
+            {% endif %}
         </tr>
 
         {% for r in records %}
         <tr>
             <td>{{ r[0] }}</td>
             <td>{{ r[1] }}</td>
+            {% if forecasts %}
+            <td>
+                {% if forecasts[r[0]] %}
+                    <strong style="color: #104f55;">{{ forecasts[r[0]]['predicted'] }} units</strong><br>
+                    <small style="color: #666;">{{ forecasts[r[0]]['message'] }}</small><br>
+                    {% if forecasts[r[0]]['target_hit'] %}
+                        <span style="background: #e2f5ec; color: #1e7e34; padding: 3px 6px; border-radius: 4px; font-size: 12px; display: inline-block; margin-top: 5px;">{{ forecasts[r[0]]['target_hit'] }}</span>
+                    {% endif %}
+                {% else %}
+                    <span style="color: #999;">Not enough data</span>
+                {% endif %}
+            </td>
+            {% endif %}
         </tr>
         {% endfor %}
     </table>

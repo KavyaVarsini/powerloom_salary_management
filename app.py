@@ -6,8 +6,10 @@ import csv
 from flask import Response
 import os
 from dotenv import load_dotenv
+from flask import jsonify
 
-# Load environment variables from .env file
+from ml_insights import get_loom_anomalies, forecast_worker_weekly_production
+
 load_dotenv()
 
 def backup_database():
@@ -418,6 +420,7 @@ def worker_production():
     cursor = conn.cursor()
 
     records = []
+    forecasts = {}
     start = end = None
 
     if request.method == "POST":
@@ -434,13 +437,24 @@ def worker_production():
         """, (start, end))
 
         records = cursor.fetchall()
+        
+        try:
+            from datetime import datetime
+            datetime.strptime(start, "%Y-%m-%d")
+            for record in records:
+                worker_name = record[0]
+                forecast = forecast_worker_weekly_production("powerloom.db", worker_name, start)
+                forecasts[worker_name] = forecast
+        except Exception as e:
+            print("Forecast error:", e)
 
     conn.close()
     return render_template(
         "worker_production.html",
         records=records,
         start=start,
-        end=end
+        end=end,
+        forecasts=forecasts
     )
 
 @app.route("/worker-salary-report", methods=["GET", "POST"])
@@ -1053,6 +1067,13 @@ def analytics():
         loom_efficiency=loom_efficiency,
         consistency_data=consistency_data
     )
+
+@app.route("/api/loom_alerts")
+@admin_required
+def loom_alerts():
+    anomalous_looms = get_loom_anomalies("powerloom.db")
+    return jsonify({"anomalous_looms": anomalous_looms})
+
 
 @app.route("/export-production")
 @admin_required
