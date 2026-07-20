@@ -6,16 +6,6 @@
 
     <h2 style="margin-bottom: 20px; font-weight: 700; color: #104f55;">Production Analytics Dashboard</h2>
 
-    <div id="ml-alerts-container" style="margin-bottom: 20px; display: none;">
-        <div class="dashboard-card" style="padding: 15px 24px; border-left: 5px solid #d9534f; background-color: #fdf2f2;">
-            <h3 style="font-size: 16px; font-weight: 600; color: #d9534f; margin-bottom: 5px;">⚠️ Predictive Maintenance Alert</h3>
-            <p style="font-size: 14px; margin: 0; color: #333;">
-                The AI anomaly detection model has flagged the following looms for potential mechanical issues (suspiciously low output): 
-                <strong id="ml-looms-list"></strong>. Please schedule a maintenance check.
-            </p>
-        </div>
-    </div>
-
     <div class="dashboard-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 20px; margin-bottom: 0;">
 
         <div class="dashboard-card" style="padding: 18px 24px; margin-bottom: 0;">
@@ -133,7 +123,25 @@ new Chart(document.getElementById("topWorkersChart"), {
     options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { display: false } }
+        plugins: { legend: { display: false } },
+        scales: {
+            x: {
+                title: {
+                    display: true,
+                    text: 'Worker Name',
+                    color: '#104f55',
+                    font: { weight: 'bold', size: 12 }
+                }
+            },
+            y: {
+                title: {
+                    display: true,
+                    text: 'Meters Weaved (m)',
+                    color: '#104f55',
+                    font: { weight: 'bold', size: 12 }
+                }
+            }
+        }
     }
 });
 
@@ -160,7 +168,25 @@ new Chart(document.getElementById("monthlyChart"), {
     },
     options: {
         responsive: true,
-        maintainAspectRatio: false
+        maintainAspectRatio: false,
+        scales: {
+            x: {
+                title: {
+                    display: true,
+                    text: 'Date / Month',
+                    color: '#104f55',
+                    font: { weight: 'bold', size: 12 }
+                }
+            },
+            y: {
+                title: {
+                    display: true,
+                    text: 'Meters Weaved (m)',
+                    color: '#104f55',
+                    font: { weight: 'bold', size: 12 }
+                }
+            }
+        }
     }
 });
 
@@ -185,7 +211,25 @@ new Chart(document.getElementById("loomChart"), {
     options: {
         indexAxis: 'y',
         responsive: true,
-        maintainAspectRatio: false
+        maintainAspectRatio: false,
+        scales: {
+            x: {
+                title: {
+                    display: true,
+                    text: 'Efficiency (%)',
+                    color: '#104f55',
+                    font: { weight: 'bold', size: 12 }
+                }
+            },
+            y: {
+                title: {
+                    display: true,
+                    text: 'Loom Number',
+                    color: '#104f55',
+                    font: { weight: 'bold', size: 12 }
+                }
+            }
+        }
     }
 });
 
@@ -305,17 +349,6 @@ document.addEventListener("DOMContentLoaded", () => {
     
     filterConsistency(categories[activeIndex], document.getElementById(ids[activeIndex]));
 });
-
-// Fetch ML alerts
-fetch('/api/loom_alerts')
-    .then(response => response.json())
-    .then(data => {
-        if (data.anomalous_looms && data.anomalous_looms.length > 0) {
-            document.getElementById('ml-looms-list').innerText = "Loom(s) " + data.anomalous_looms.join(", ");
-            document.getElementById('ml-alerts-container').style.display = 'block';
-        }
-    })
-    .catch(err => console.error("Error fetching ML alerts", err));
 
 </script>
 

@@ -31,6 +31,56 @@
             margin-bottom: 30px;
         }
 
+        .letterhead-header {
+            margin-bottom: 25px;
+        }
+
+        .letterhead-top-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #104f55;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .letterhead-title-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .letterhead-logo {
+            max-height: 65px;
+            object-fit: contain;
+        }
+
+        .letterhead-title-text h1 {
+            color: #104f55;
+            margin: 0;
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            text-transform: uppercase;
+        }
+
+        .letterhead-title-text p.address {
+            margin: 2px 0;
+            color: #2c3e50;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .double-line-divider {
+            border-top: 3px double #104f55;
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+
         .header h1 {
             color: #1f6f73;
             margin: 0;
@@ -180,10 +230,26 @@
     </div>
 
     <div class="payslip-container">
-        <div class="header">
-            <h1>JAIKRISHNA WEAVING MILLS</h1>
-            <p>Powerloom Production & Salary Slip</p>
-            <span class="title-badge">Salary Statement</span>
+        <div class="letterhead-header">
+            <div class="letterhead-top-row">
+                <span class="gstin">GSTIN : 33AAQFJ1452K1Z7</span>
+                <span class="cell">Cell : 97866 64730, 93666 64730</span>
+            </div>
+            
+            <div class="letterhead-title-container">
+                <img src="{{ url_for('static', filename='logo.PNG') }}" alt="Logo" class="letterhead-logo">
+                <div class="letterhead-title-text">
+                    <h1>JAI KRISHNA WEAVING MILLS</h1>
+                    <p class="address">1/501 - A1, Kallimedu Thottam, Nallagoundenpalayam, Paduvampalli (Po),</p>
+                    <p class="address">Sulur (Tk.), Coimbatore - 641 659.</p>
+                </div>
+            </div>
+
+            <div class="double-line-divider"></div>
+
+            <div style="text-align: center; margin-top: 10px;">
+                <span class="title-badge">Powerloom Salary Payslip</span>
+            </div>
         </div>
 
         <div class="details-grid">

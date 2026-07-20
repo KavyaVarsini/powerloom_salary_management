@@ -24,6 +24,14 @@
 
     <div class="kpi-card">
         <div class="kpi-card-content">
+            <h3>Inactive Workers</h3>
+            <p>{{ inactive_workers }}</p>
+        </div>
+        <i class="fa-solid fa-user-xmark kpi-card-icon" style="color: #e74c3c;"></i>
+    </div>
+
+    <div class="kpi-card">
+        <div class="kpi-card-content">
             <h3>Today's Meters Weaved</h3>
             <p>{{ today_production }}</p>
         </div>
@@ -34,6 +42,9 @@
         <div class="kpi-card-content">
             <h3>This Week Meters Weaved</h3>
             <p>{{ week_production }}</p>
+            {% if week_range_str %}
+            <small style="font-size: 11px; color: var(--text-muted); font-weight: 500;">Period: {{ week_range_str }}</small>
+            {% endif %}
         </div>
         <i class="fa-solid fa-calendar-week kpi-card-icon"></i>
     </div>
@@ -42,6 +53,9 @@
         <div class="kpi-card-content">
             <h3>This Week Salary</h3>
             <p>₹ {{ week_salary }}</p>
+            {% if week_range_str %}
+            <small style="font-size: 11px; color: rgba(255,255,255,0.85); font-weight: 500;">Period: {{ week_range_str }}</small>
+            {% endif %}
         </div>
         <i class="fa-solid fa-indian-rupee-sign kpi-card-icon" style="color: white; opacity: 0.8;"></i>
     </div>
@@ -100,6 +114,10 @@
 {{ weekly_trend | tojson }}
 </script>
 
+<script id="regular-alerts-data" type="application/json">
+{{ (alert_workers and alert_workers|length > 0) | tojson }}
+</script>
+
 <script>
 const weeklyRaw = JSON.parse(
     document.getElementById("weekly-data").textContent
@@ -123,7 +141,25 @@ new Chart(document.getElementById("weeklyChart"), {
     },
     options: {
         responsive: true,
-        maintainAspectRatio: false
+        maintainAspectRatio: false,
+        scales: {
+            x: {
+                title: {
+                    display: true,
+                    text: 'Date / Day',
+                    color: '#104f55',
+                    font: { weight: 'bold', size: 12 }
+                }
+            },
+            y: {
+                title: {
+                    display: true,
+                    text: 'Meters Weaved (m)',
+                    color: '#104f55',
+                    font: { weight: 'bold', size: 12 }
+                }
+            }
+        }
     }
 });
 
@@ -138,7 +174,7 @@ fetch('/api/loom_alerts')
         let hasMLAlerts = data.anomalous_looms && data.anomalous_looms.length > 0;
         
         // If there are no regular alerts and no ML alerts, show the "No issues" text
-        const hasRegularAlerts = {% if alert_workers and alert_workers|length > 0 %}true{% else %}false{% endif %};
+        const hasRegularAlerts = JSON.parse(document.getElementById("regular-alerts-data").textContent);
         
         if (!hasMLAlerts && !hasRegularAlerts && noAlertsMsg) {
             noAlertsMsg.style.display = 'block';
@@ -166,7 +202,7 @@ fetch('/api/loom_alerts')
         if (skeleton) skeleton.style.display = 'none';
         
         const noAlertsMsg = document.getElementById('no-alerts-msg');
-        const hasRegularAlerts = {% if alert_workers and alert_workers|length > 0 %}true{% else %}false{% endif %};
+        const hasRegularAlerts = JSON.parse(document.getElementById("regular-alerts-data").textContent);
         if (!hasRegularAlerts && noAlertsMsg) {
             noAlertsMsg.style.display = 'block';
         }

@@ -22,7 +22,7 @@
     <!-- TOP NAVBAR -->
     <header class="navbar">
         <div class="navbar-brand">
-            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
+            <img src="{{ url_for('static', filename='logo_white.png') }}" alt="Logo" class="logo">
             <span>Jaikrishna Weaving Mills</span>
         </div>
     </header>
@@ -165,22 +165,82 @@
         });
 
 
+        let pdfGreenLogoUrl = null;
+        document.addEventListener("DOMContentLoaded", function() {
+            const img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.onload = function() {
+                const canvas = document.createElement("canvas");
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0);
+                pdfGreenLogoUrl = canvas.toDataURL("image/png");
+            };
+            img.src = "/static/logo.PNG";
+        });
+
         window.exportTableToPDF = function(tableId, title, filename) {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
-            // Add Title
+            // Letterhead Top Row: GSTIN & Cell numbers
+            doc.setFontSize(9);
+            doc.setFont("helvetica", "bold");
+            doc.setTextColor(16, 79, 85); // #104f55
+            doc.text("GSTIN : 33AAQFJ1452K1Z7", 14, 12);
+            doc.text("Cell : 97866 64730, 93666 64730", 196, 12, { align: "right" });
+
+            // Add Green Logo to PDF Header if available
+            if (pdfGreenLogoUrl) {
+                try {
+                    doc.addImage(pdfGreenLogoUrl, "PNG", 14, 15, 20, 16);
+                } catch (e) {
+                    console.error("Error adding logo to PDF:", e);
+                }
+            }
+
+            // Company Name (Green Bold Centered)
             doc.setFontSize(18);
-            doc.setTextColor(31, 111, 115); // Jaikrishna theme color #1f6f73
-            doc.text("JAIKRISHNA WEAVING MILLS", 14, 15);
+            doc.setFont("helvetica", "bold");
+            doc.setTextColor(16, 79, 85); // #104f55
+            doc.text("JAI KRISHNA WEAVING MILLS", 105, 20, { align: "center" });
+
+            // Address Lines (Centered)
+            doc.setFontSize(9);
+            doc.setFont("helvetica", "normal");
+            doc.setTextColor(44, 62, 80);
+            doc.text("1/501 - A1, Kallimedu Thottam, Nallagoundenpalayam, Paduvampalli (Po),", 105, 25, { align: "center" });
+            doc.text("Sulur (Tk.), Coimbatore - 641 659.", 105, 29, { align: "center" });
+
+            // Double Green Line Divider
+            doc.setDrawColor(16, 79, 85);
+            doc.setLineWidth(0.8);
+            doc.line(14, 32, 196, 32);
+            doc.setLineWidth(0.3);
+            doc.line(14, 33.2, 196, 33.2);
+
+            // Report Title & Timestamp
+            doc.setFontSize(11);
+            doc.setFont("helvetica", "bold");
+            doc.setTextColor(31, 111, 115);
+            doc.text(title, 14, 40);
             
-            doc.setFontSize(12);
+            doc.setFontSize(9);
+            doc.setFont("helvetica", "normal");
             doc.setTextColor(100, 100, 100);
-            doc.text(title, 14, 22);
+            doc.text("Generated on: " + new Date().toLocaleDateString(), 196, 40, { align: "right" });
             
-            doc.setFontSize(10);
-            doc.text("Generated on: " + new Date().toLocaleDateString(), 14, 28);
-            
+            // Helper function to extract and format cell text with clean linebreaks
+            function cleanCellText(cell) {
+                if (!cell) return "";
+                let text = cell.innerText || "";
+                return text.split('\n')
+                    .map(line => line.replace(/\s+/g, ' ').trim())
+                    .filter(line => line.length > 0)
+                    .join('\n');
+            }
+
             // Find Table
             const table = document.getElementById(tableId) || document.querySelector("table");
             if (!table) {
@@ -193,49 +253,46 @@
             let body = [];
             let actionIndex = -1;
 
-            if (dtInstance) {
-                // Get all column headers and look for Actions column index
+            if (dtInstance && dtInstance.headings && dtInstance.headings.length > 0) {
                 headers = dtInstance.headings.map((th, idx) => {
-                    let text = th.innerText.trim();
-                    if (text === 'Actions') {
-                        actionIndex = idx;
-                    }
+                    let text = (th.innerText || th.textContent || "").trim();
+                    if (text === 'Actions') actionIndex = idx;
                     return text;
                 });
-
-                // Check if client-side search is currently active in the datatable wrapper
-                const wrapper = table.closest(".dataTable-wrapper");
-                const searchInput = wrapper ? wrapper.querySelector(".dataTable-input") : null;
-                const isSearching = searchInput && searchInput.value.trim() !== "";
-
-                // Get rows that match the filter (either searched rows or all rows)
-                let rowsToExport = [];
-                if (isSearching && dtInstance.searchData && dtInstance.searchData.length > 0) {
-                    rowsToExport = dtInstance.searchData.map(idx => dtInstance.data[idx]);
-                } else if (isSearching && dtInstance.searchData && dtInstance.searchData.length === 0) {
-                    rowsToExport = []; // Search matched nothing
-                } else {
-                    rowsToExport = dtInstance.data; // No search active, export all table records
-                }
-
-                body = rowsToExport.map(tr => {
-                    return Array.from(tr.cells).map(cell => cell.innerText.trim());
+                body = (dtInstance.data || []).map(tr => {
+                    return Array.from(tr.cells).map(cell => cleanCellText(cell));
                 });
             } else {
-                // Fallback for standard tables
                 const thElements = table.querySelectorAll("th");
                 headers = Array.from(thElements).map((th, idx) => {
                     let text = th.innerText.trim();
-                    if (text === 'Actions') {
-                        actionIndex = idx;
-                    }
+                    if (text === 'Actions') actionIndex = idx;
                     return text;
                 });
 
-                const trElements = table.querySelectorAll("tbody tr");
-                body = Array.from(trElements).map(tr => {
-                    return Array.from(tr.cells).map(cell => cell.innerText.trim());
+                const trElements = table.querySelectorAll("tr");
+                body = Array.from(trElements).filter(tr => tr.querySelector("td")).map(tr => {
+                    return Array.from(tr.cells).map(cell => cleanCellText(cell));
                 });
+            }
+
+            // Fallback: If headers are empty or contain only blank strings, extract from <th> elements
+            if (headers.length === 0 || headers.every(h => h === "")) {
+                const ths = table.querySelectorAll("th");
+                if (ths.length > 0) {
+                    headers = Array.from(ths).map((th, idx) => {
+                        let text = th.innerText.trim();
+                        if (text === 'Actions') actionIndex = idx;
+                        return text;
+                    });
+                }
+            }
+
+            // Remove header row if it accidentally leaked into body rows
+            if (body.length > 0 && headers.length > 0) {
+                if (body[0].join("|") === headers.join("|")) {
+                    body.shift();
+                }
             }
 
             // Strip out Actions column from headers and body row arrays if it exists
@@ -247,13 +304,25 @@
                 });
             }
             
-            // Generate PDF Table
+            // Generate PDF Table with green filled box headers and white text
             doc.autoTable({
                 head: [headers],
                 body: body,
-                startY: 33,
+                startY: 45,
                 theme: 'grid',
-                headStyles: { fillColor: [31, 111, 115] }
+                headStyles: { 
+                    fillColor: [16, 79, 85], 
+                    textColor: [255, 255, 255], 
+                    fontStyle: 'bold',
+                    halign: 'left'
+                },
+                styles: {
+                    fontSize: 8.5,
+                    cellPadding: 3,
+                    overflow: 'linebreak',
+                    valign: 'middle'
+                },
+                margin: { left: 14, right: 14 }
             });
             
             doc.save(filename || 'report.pdf');

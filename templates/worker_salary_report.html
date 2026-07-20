@@ -31,17 +31,20 @@
 
 <div class="report-table-card">
     <table id="salary-table">
-        <tr>
-            <th>Worker Name</th>
-            <th>Total Salary (₹)</th>
-        </tr>
-
-        {% for r in records %}
-        <tr>
-            <td>{{ r[0] }}</td>
-            <td>{{ r[1] }}</td>
-        </tr>
-        {% endfor %}
+        <thead>
+            <tr>
+                <th>Worker Name</th>
+                <th>Total Salary (₹)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in records %}
+            <tr>
+                <td>{{ r[0] }}</td>
+                <td>{{ r[1] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
 </div>
 

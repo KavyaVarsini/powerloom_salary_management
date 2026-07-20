@@ -77,9 +77,14 @@ def home():
     cursor.execute("SELECT COUNT(*) FROM workers WHERE active_status='Active'")
     active_workers = cursor.fetchone()[0]
 
+    # Inactive Workers
+    cursor.execute("SELECT COUNT(*) FROM workers WHERE active_status!='Active'")
+    inactive_workers = cursor.fetchone()[0]
+
     # Today's Production
     from datetime import date, timedelta
-    today = date.today().isoformat()
+    today_dt = date.today()
+    today = today_dt.isoformat()
 
     cursor.execute("""
         SELECT COALESCE(SUM(output_quantity), 0)
@@ -88,8 +93,12 @@ def home():
     """, (today,))
     today_production = cursor.fetchone()[0]
 
-    # This Week Production
-    week_start = (date.today() - timedelta(days=date.today().weekday())).isoformat()
+    # This Week Production & Salary (Monday to Sunday)
+    week_start_dt = today_dt - timedelta(days=today_dt.weekday())
+    week_end_dt = week_start_dt + timedelta(days=6)
+    week_start = week_start_dt.isoformat()
+
+    week_range_str = f"Mon ({week_start_dt.strftime('%d/%m')}) - Sun ({week_end_dt.strftime('%d/%m')})"
 
     cursor.execute("""
         SELECT COALESCE(SUM(output_quantity), 0)
@@ -153,9 +162,11 @@ def home():
         "index.html",
         total_workers=total_workers,
         active_workers=active_workers,
+        inactive_workers=inactive_workers,
         today_production=today_production,
         week_production=week_production,
         week_salary=week_salary,
+        week_range_str=week_range_str,
         weekly_trend=weekly_trend,
         alert_workers=alert_workers
     )
