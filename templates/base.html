@@ -156,6 +156,10 @@
                 themeIcon.className = 'fa-solid fa-moon';
                 themeText.innerText = 'Dark Mode';
             }
+
+            if (typeof window.renderCharts === 'function') {
+                window.renderCharts();
+            }
         }
         
         document.addEventListener('DOMContentLoaded', () => {

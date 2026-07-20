@@ -4,33 +4,33 @@
 
 <div class="dashboard-container">
 
-    <h2 style="margin-bottom: 20px; font-weight: 700; color: #104f55;">Production Analytics Dashboard</h2>
+    <h2 style="margin-bottom: 20px; font-weight: 700; color: var(--primary);">Production Analytics Dashboard</h2>
 
     <div class="dashboard-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 20px; margin-bottom: 0;">
 
         <div class="dashboard-card" style="padding: 18px 24px; margin-bottom: 0;">
-            <h3 style="font-size: 15px; font-weight: 600; color: #104f55; margin-bottom: 10px;">Top Performing Workers</h3>
+            <h3 style="font-size: 15px; font-weight: 600; color: var(--primary); margin-bottom: 10px;">Top Performing Workers</h3>
             <div style="height: 180px; position: relative;">
                 <canvas id="topWorkersChart"></canvas>
             </div>
         </div>
 
         <div class="dashboard-card" style="padding: 18px 24px; margin-bottom: 0;">
-            <h3 style="font-size: 15px; font-weight: 600; color: #104f55; margin-bottom: 10px;">Worker Consistency Distribution</h3>
+            <h3 style="font-size: 15px; font-weight: 600; color: var(--primary); margin-bottom: 10px;">Worker Consistency Distribution</h3>
             <div style="height: 180px; position: relative;">
                 <canvas id="consistencyChart"></canvas>
             </div>
         </div>
 
         <div class="dashboard-card" style="padding: 18px 24px; margin-bottom: 0;">
-            <h3 style="font-size: 15px; font-weight: 600; color: #104f55; margin-bottom: 10px;">Monthly Production Trend</h3>
+            <h3 style="font-size: 15px; font-weight: 600; color: var(--primary); margin-bottom: 10px;">Monthly Production Trend</h3>
             <div style="height: 180px; position: relative;">
                 <canvas id="monthlyChart"></canvas>
             </div>
         </div>
 
         <div class="dashboard-card" style="padding: 18px 24px; margin-bottom: 0;">
-            <h3 style="font-size: 15px; font-weight: 600; color: #104f55; margin-bottom: 10px;">Loom Efficiency (%)</h3>
+            <h3 style="font-size: 15px; font-weight: 600; color: var(--primary); margin-bottom: 10px;">Loom Efficiency (%)</h3>
             <div style="height: 180px; position: relative;">
                 <canvas id="loomChart"></canvas>
             </div>
@@ -47,22 +47,19 @@
         cursor: pointer;
         font-family: inherit;
     }
-    .toggle-section button.active-toggle {
-        background-color: white !important;
-    }
     </style>
 
     <!-- WORKER CONSISTENCY DETAILS CARD -->
     <div class="dashboard-card" style="padding: 24px; margin-top: 25px;">
-        <h3 style="font-size: 16px; font-weight: 600; color: #104f55; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">Worker Consistency Classification</h3>
-        <div class="toggle-section" style="margin-bottom: 15px; background-color: #e2ebed; padding: 4px; border-radius: 8px; display: inline-flex; gap: 4px;">
+        <h3 style="font-size: 16px; font-weight: 600; color: var(--primary); margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">Worker Consistency Classification</h3>
+        <div class="toggle-section" style="margin-bottom: 15px; padding: 4px; border-radius: 8px; display: inline-flex; gap: 4px;">
             <button class="toggle-btn" onclick="filterConsistency('Excellent', this)" id="btn-Excellent">Excellent</button>
             <button class="toggle-btn" onclick="filterConsistency('Good', this)" id="btn-Good">Good</button>
             <button class="toggle-btn" onclick="filterConsistency('Average', this)" id="btn-Average">Average</button>
             <button class="toggle-btn" onclick="filterConsistency('Poor', this)" id="btn-Poor">Poor</button>
             <button class="toggle-btn" onclick="filterConsistency('Insufficient Data', this)" id="btn-Insufficient">Insufficient Data</button>
         </div>
-        <div id="consistency-workers-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; max-height: 250px; overflow-y: auto; padding: 15px; border: 1px solid var(--border-color); border-radius: 8px; background-color: #fafbfc;">
+        <div id="consistency-workers-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; max-height: 250px; overflow-y: auto; padding: 15px; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--bg-main);">
             <!-- Worker names will be dynamically injected here by JS -->
         </div>
     </div>
@@ -107,176 +104,147 @@ const consistencyRaw = JSON.parse(document.getElementById("consistency-data").te
    TOP WORKERS BAR CHART
 ================================= */
 
-const workerNames = workerRaw.map(item => item[0]);
-const workerOutput = workerRaw.map(item => item[1]);
+let chartInstances = {};
 
-new Chart(document.getElementById("topWorkersChart"), {
-    type: "bar",
-    data: {
-        labels: workerNames,
-        datasets: [{
-            label: "Meters Weaved",
-            data: workerOutput,
-            backgroundColor: "#104f55"
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-            x: {
-                title: {
-                    display: true,
-                    text: 'Worker Name',
-                    color: '#104f55',
-                    font: { weight: 'bold', size: 12 }
-                }
-            },
-            y: {
-                title: {
-                    display: true,
-                    text: 'Meters Weaved (m)',
-                    color: '#104f55',
-                    font: { weight: 'bold', size: 12 }
-                }
-            }
-        }
-    }
-});
+function getChartColors() {
+    const isDark = document.body.classList.contains('dark-theme');
+    return {
+        titleColor: isDark ? '#4db6ac' : '#104f55',
+        labelColor: isDark ? '#b0bec5' : '#627275',
+        gridColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
+        barBg: isDark ? '#26a69a' : '#104f55',
+        lineBorder: isDark ? '#4db6ac' : '#104f55',
+        lineBg: isDark ? 'rgba(77, 182, 172, 0.25)' : 'rgba(16, 79, 85, 0.15)',
+        legendText: isDark ? '#e0f2f1' : '#1d2b2d'
+    };
+}
 
+function renderAnalyticsCharts() {
+    const c = getChartColors();
+    
+    Object.keys(chartInstances).forEach(key => {
+        if (chartInstances[key]) chartInstances[key].destroy();
+    });
 
-/* ===============================
-   MONTHLY TREND LINE CHART
-================================= */
-
-const months = monthlyRaw.map(item => item[0]);
-const monthlyData = monthlyRaw.map(item => item[1]);
-
-new Chart(document.getElementById("monthlyChart"), {
-    type: "line",
-    data: {
-        labels: months,
-        datasets: [{
-            label: "Meters Weaved",
-            data: monthlyData,
-            borderColor: "#104f55",
-            backgroundColor: "rgba(16,79,85,0.15)",
-            fill: true,
-            tension: 0.3
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-            x: {
-                title: {
-                    display: true,
-                    text: 'Date / Month',
-                    color: '#104f55',
-                    font: { weight: 'bold', size: 12 }
-                }
-            },
-            y: {
-                title: {
-                    display: true,
-                    text: 'Meters Weaved (m)',
-                    color: '#104f55',
-                    font: { weight: 'bold', size: 12 }
+    chartInstances.topWorkers = new Chart(document.getElementById("topWorkersChart"), {
+        type: "bar",
+        data: {
+            labels: workerNames,
+            datasets: [{
+                label: "Meters Weaved",
+                data: workerOutput,
+                backgroundColor: c.barBg
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: {
+                    title: { display: true, text: 'Worker Name', color: c.titleColor, font: { weight: 'bold', size: 12 } },
+                    ticks: { color: c.labelColor },
+                    grid: { color: c.gridColor }
+                },
+                y: {
+                    title: { display: true, text: 'Meters Weaved (m)', color: c.titleColor, font: { weight: 'bold', size: 12 } },
+                    ticks: { color: c.labelColor },
+                    grid: { color: c.gridColor }
                 }
             }
         }
-    }
-});
+    });
 
-
-/* ===============================
-   LOOM EFFICIENCY HORIZONTAL BAR
-================================= */
-
-const loomNames = loomRaw.map(item => item[0]);
-const loomValues = loomRaw.map(item => item[1]);
-
-new Chart(document.getElementById("loomChart"), {
-    type: "bar",
-    data: {
-        labels: loomNames,
-        datasets: [{
-            label: "Efficiency %",
-            data: loomValues,
-            backgroundColor: "#104f55"
-        }]
-    },
-    options: {
-        indexAxis: 'y',
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-            x: {
-                title: {
-                    display: true,
-                    text: 'Efficiency (%)',
-                    color: '#104f55',
-                    font: { weight: 'bold', size: 12 }
-                }
-            },
-            y: {
-                title: {
-                    display: true,
-                    text: 'Loom Number',
-                    color: '#104f55',
-                    font: { weight: 'bold', size: 12 }
+    chartInstances.monthly = new Chart(document.getElementById("monthlyChart"), {
+        type: "line",
+        data: {
+            labels: months,
+            datasets: [{
+                label: "Meters Weaved",
+                data: monthlyData,
+                borderColor: c.lineBorder,
+                backgroundColor: c.lineBg,
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    title: { display: true, text: 'Date / Month', color: c.titleColor, font: { weight: 'bold', size: 12 } },
+                    ticks: { color: c.labelColor },
+                    grid: { color: c.gridColor }
+                },
+                y: {
+                    title: { display: true, text: 'Meters Weaved (m)', color: c.titleColor, font: { weight: 'bold', size: 12 } },
+                    ticks: { color: c.labelColor },
+                    grid: { color: c.gridColor }
                 }
             }
         }
-    }
-});
+    });
 
-
-/* ===============================
-   CONSISTENCY DONUT CHART
-================================= */
-
-let categoryCount = {
-    "Excellent": 0,
-    "Good": 0,
-    "Average": 0,
-    "Poor": 0,
-    "Insufficient Data": 0
-};
-
-consistencyRaw.forEach(item => {
-    if (categoryCount[item[1]] !== undefined) {
-        categoryCount[item[1]]++;
-    }
-});
-
-new Chart(document.getElementById("consistencyChart"), {
-    type: "doughnut",
-    data: {
-        labels: Object.keys(categoryCount),
-        datasets: [{
-            data: Object.values(categoryCount),
-            backgroundColor: [
-                "#2ecc71",
-                "#27ae60",
-                "#f39c12",
-                "#e74c3c",
-                "#95a5a6"
-            ]
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'right'
+    chartInstances.loom = new Chart(document.getElementById("loomChart"), {
+        type: "bar",
+        data: {
+            labels: loomNames,
+            datasets: [{
+                label: "Efficiency %",
+                data: loomValues,
+                backgroundColor: c.barBg
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    title: { display: true, text: 'Efficiency (%)', color: c.titleColor, font: { weight: 'bold', size: 12 } },
+                    ticks: { color: c.labelColor },
+                    grid: { color: c.gridColor }
+                },
+                y: {
+                    title: { display: true, text: 'Loom Number', color: c.titleColor, font: { weight: 'bold', size: 12 } },
+                    ticks: { color: c.labelColor },
+                    grid: { color: c.gridColor }
+                }
             }
         }
-    }
-});
+    });
+
+    chartInstances.consistency = new Chart(document.getElementById("consistencyChart"), {
+        type: "doughnut",
+        data: {
+            labels: Object.keys(categoryCount),
+            datasets: [{
+                data: Object.values(categoryCount),
+                backgroundColor: [
+                    "#2ecc71",
+                    "#27ae60",
+                    "#f39c12",
+                    "#e74c3c",
+                    "#95a5a6"
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: { color: c.legendText }
+                }
+            }
+        }
+    });
+}
+
+window.renderCharts = renderAnalyticsCharts;
+renderAnalyticsCharts();
 
 
 /* ===============================

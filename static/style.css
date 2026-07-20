@@ -657,6 +657,78 @@ body.dark-theme .dataTable-input {
     border-color: #2b3a3e;
 }
 
+/* Dark Theme Additional Overrides */
+body.dark-theme th {
+    background-color: #1a2528;
+    color: #a4b4b8;
+    border-color: var(--border-color);
+}
+
+body.dark-theme tbody tr:hover {
+    background-color: #1a2528;
+}
+
+body.dark-theme .toggle-section {
+    background-color: #1a2528 !important;
+}
+
+body.dark-theme .toggle-btn {
+    color: #839799;
+}
+
+body.dark-theme .toggle-btn:hover {
+    color: var(--primary);
+}
+
+body.dark-theme .active-toggle {
+    background-color: var(--card-bg) !important;
+    color: var(--primary) !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+body.dark-theme .secondary-btn {
+    background-color: #1a2528;
+    color: var(--primary);
+}
+
+body.dark-theme .secondary-btn:hover {
+    background-color: #243538;
+}
+
+body.dark-theme .result-header {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+}
+
+body.dark-theme #consistency-workers-list {
+    background-color: var(--bg-main) !important;
+    border-color: var(--border-color) !important;
+}
+
+body.dark-theme #consistency-workers-list div {
+    background-color: var(--card-bg) !important;
+    color: var(--text-main) !important;
+    border-color: var(--border-color) !important;
+}
+
+body.dark-theme select option {
+    background-color: #1a2427;
+    color: #ffffff;
+}
+
+body.dark-theme .edit-btn {
+    background-color: #1a2528;
+    color: var(--primary);
+}
+
+body.dark-theme .edit-btn:hover {
+    background-color: #243538;
+}
+
+body.dark-theme .kpi-card {
+    background-color: var(--card-bg);
+}
+
 /* Theme Toggle Button Styles */
 .theme-toggle-container {
     padding: 15px 10px;
