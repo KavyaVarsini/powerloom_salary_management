@@ -45,30 +45,33 @@
         <!-- SIDEBAR -->
         <div class="sidebar">
 
-            <a href="/">Dashboard</a>
+            <div class="sidebar-category">Overview</div>
+            <a href="/"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
             
             {% if session.get('role') == 'Admin' %}
-            <a href="/add-worker">Add Worker</a>
-            <a href="/view-workers">View Workers</a>
+            <div class="sidebar-category">Masters</div>
+            <a href="/add-worker"><i class="fa-solid fa-user-plus"></i> Add Worker</a>
+            <a href="/view-workers"><i class="fa-solid fa-users"></i> View Workers</a>
 
-            <a href="/add-loom">Add Loom</a>
-            <a href="/view-looms">View Looms</a>
+            <a href="/add-loom"><i class="fa-solid fa-plus-circle"></i> Add Loom</a>
+            <a href="/view-looms"><i class="fa-solid fa-table-cells"></i> View Looms</a>
             {% endif %}
 
-            <a href="/daily-entry">Daily Entry</a>
+            <div class="sidebar-category">Operations</div>
+            <a href="/daily-entry"><i class="fa-solid fa-pen-to-square"></i> Daily Entry</a>
+            <a href="/daily-history"><i class="fa-solid fa-calendar-days"></i> Daily History</a>
             
             {% if session.get('role') == 'Admin' %}
-            <a href="/weekly-salary">Weekly Salary</a>
-            <a href="/loans">Manage Loans</a>
-            <a href="/targets">Manage Targets</a>
+            <a href="/weekly-salary"><i class="fa-solid fa-file-invoice-dollar"></i> Weekly Salary</a>
+            <a href="/loans"><i class="fa-solid fa-hand-holding-dollar"></i> Manage Loans</a>
+            <a href="/targets"><i class="fa-solid fa-bullseye"></i> Manage Targets</a>
             {% endif %}
             
-            <a href="/daily-history">Daily History</a>
-            
             {% if session.get('role') == 'Admin' %}
-            <a href="/worker-production">Production Report</a>
-            <a href="/worker-salary-report">Salary Report</a>
-            <a href="/analytics">Analytics</a>           
+            <div class="sidebar-category">Reports & Analytics</div>
+            <a href="/worker-production"><i class="fa-solid fa-chart-line"></i> Production Report</a>
+            <a href="/worker-salary-report"><i class="fa-solid fa-receipt"></i> Salary Report</a>
+            <a href="/analytics"><i class="fa-solid fa-chart-pie"></i> Analytics</a>           
             {% endif %}
             
             <div class="theme-toggle-container">
@@ -77,7 +80,7 @@
                 </button>
             </div>
             
-            <a href="/logout" class="logout">Logout</a>
+            <a href="/logout" class="logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
         </div>
         <!-- DELETE CONFIRMATION MODAL -->
 <div id="deleteModal" class="modal">
