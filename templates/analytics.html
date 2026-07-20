@@ -99,10 +99,28 @@ const monthlyRaw = JSON.parse(document.getElementById("monthly-data").textConten
 const loomRaw = JSON.parse(document.getElementById("loom-data").textContent);
 const consistencyRaw = JSON.parse(document.getElementById("consistency-data").textContent);
 
+const workerNames = workerRaw.map(item => item[0]);
+const workerOutput = workerRaw.map(item => item[1]);
 
-/* ===============================
-   TOP WORKERS BAR CHART
-================================= */
+const months = monthlyRaw.map(item => item[0]);
+const monthlyData = monthlyRaw.map(item => item[1]);
+
+const loomNames = loomRaw.map(item => item[0]);
+const loomValues = loomRaw.map(item => item[1]);
+
+let categoryCount = {
+    "Excellent": 0,
+    "Good": 0,
+    "Average": 0,
+    "Poor": 0,
+    "Insufficient Data": 0
+};
+
+consistencyRaw.forEach(item => {
+    if (categoryCount[item[1]] !== undefined) {
+        categoryCount[item[1]]++;
+    }
+});
 
 let chartInstances = {};
 

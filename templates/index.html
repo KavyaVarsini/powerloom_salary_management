@@ -123,6 +123,9 @@ const weeklyRaw = JSON.parse(
     document.getElementById("weekly-data").textContent
 );
 
+const dates = weeklyRaw.map(item => item[0]);
+const values = weeklyRaw.map(item => item[1]);
+
 let weeklyChartInstance = null;
 
 function renderDashboardCharts() {
