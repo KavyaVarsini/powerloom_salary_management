@@ -243,6 +243,166 @@ def add_loom():
 
 
 
+def calculate_incentive(total_meters, conn=None):
+    """
+    Calculates automated tiered incentive bonus based on total meters produced.
+    Queries incentive_targets table ordered by target_quantity DESC.
+    Returns: (bonus_amount, target_quantity)
+    """
+    close_at_end = False
+    if conn is None:
+        conn = connect_db()
+        close_at_end = True
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT target_quantity, bonus_amount FROM incentive_targets ORDER BY target_quantity DESC")
+        targets = cursor.fetchall()
+        if not targets:
+            # Fallback default tiers if table is empty
+            targets = [(800, 1000.0), (600, 500.0), (400, 200.0)]
+
+        for target_qty, bonus in targets:
+            if total_meters >= target_qty:
+                return float(bonus), target_qty
+        return 0.0, None
+    except Exception as e:
+        print(f"Error calculating incentive: {e}")
+        return 0.0, None
+    finally:
+        if close_at_end:
+            conn.close()
+
+
+@app.route("/bulk-daily-entry", methods=["GET", "POST"])
+@login_required
+def bulk_daily_entry():
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    if request.method == "POST":
+        entry_date = request.form.get("date")
+        shift = request.form.get("shift")
+
+        looms = request.form.getlist("loom_number[]")
+        workers = request.form.getlist("worker_name[]")
+        outputs = request.form.getlist("output_quantity[]")
+        run_times = request.form.getlist("run_time_hours[]")
+
+        inserted_count = 0
+        skipped_count = 0
+
+        for i in range(len(looms)):
+            worker = workers[i].strip() if i < len(workers) and workers[i] else ""
+            output_str = outputs[i].strip() if i < len(outputs) and outputs[i] else ""
+            loom_str = looms[i].strip() if i < len(looms) and looms[i] else ""
+            rt_str = run_times[i].strip() if i < len(run_times) and run_times[i] else "12.0"
+
+            # Skip empty or unassigned rows
+            if not worker or not output_str or not loom_str:
+                continue
+
+            try:
+                loom = int(loom_str)
+                output = int(output_str)
+                run_time = float(rt_str) if rt_str else 12.0
+                if run_time < 0 or run_time > 24:
+                    run_time = 12.0
+
+                # Check duplicate entry for this worker, date and shift
+                cursor.execute("""
+                    SELECT COUNT(*) FROM daily_output
+                    WHERE worker_name=? AND date=? AND shift=?
+                """, (worker, entry_date, shift))
+
+                if cursor.fetchone()[0] > 0:
+                    skipped_count += 1
+                    continue
+
+                cursor.execute("""
+                    INSERT INTO daily_output
+                    (worker_name, loom_number, date, shift, output_quantity, run_time_hours)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """, (worker, loom, entry_date, shift, output, run_time))
+                inserted_count += 1
+
+            except Exception as e:
+                print(f"Error inserting bulk row for loom {loom_str}: {e}")
+
+        conn.commit()
+        conn.close()
+
+        if inserted_count > 0:
+            msg = f"Successfully saved {inserted_count} loom entries for {entry_date} ({shift} Shift)."
+            if skipped_count > 0:
+                msg += f" ({skipped_count} duplicate worker entries skipped)."
+            flash(msg, "success")
+        elif skipped_count > 0:
+            flash(f"No new entries saved. {skipped_count} duplicate worker entries were skipped.", "warning")
+        else:
+            flash("No entries submitted. Please select a worker and enter meters for at least one loom.", "danger")
+
+        return redirect(url_for("bulk_daily_entry", date=entry_date, shift=shift))
+
+    # GET Request
+    entry_date = request.args.get("date")
+    shift = request.args.get("shift", "Morning")
+    if not entry_date:
+        entry_date = datetime.now().strftime("%Y-%m-%d")
+
+    # Fetch all active worker names + any worker names that exist in daily_output
+    cursor.execute("""
+        SELECT worker_name FROM workers WHERE active_status='Active'
+        UNION
+        SELECT DISTINCT worker_name FROM daily_output
+        ORDER BY worker_name
+    """)
+    workers = cursor.fetchall()
+
+    cursor.execute("SELECT loom_number, rate_per_unit, status FROM looms WHERE status='Active' ORDER BY loom_number")
+    looms = cursor.fetchall()
+
+    # Pre-fill existing entries for this date & shift
+    cursor.execute("""
+        SELECT loom_number, worker_name, output_quantity, run_time_hours
+        FROM daily_output
+        WHERE date=? AND shift=?
+    """, (entry_date, shift))
+    existing_map = {}
+    for r in cursor.fetchall():
+        ln, wn, oq, rt = r[0], r[1], r[2], r[3]
+        d = {"worker_name": wn, "output_quantity": oq, "run_time_hours": rt}
+        existing_map[ln] = d
+        existing_map[str(ln)] = d
+
+    # Fetch last known worker assigned to each loom for smart fallback pre-selection
+    cursor.execute("""
+        SELECT loom_number, worker_name
+        FROM daily_output
+        WHERE record_id IN (
+            SELECT MAX(record_id)
+            FROM daily_output
+            GROUP BY loom_number
+        )
+    """)
+    last_worker_map = {}
+    for r in cursor.fetchall():
+        ln, wn = r[0], r[1]
+        last_worker_map[ln] = wn
+        last_worker_map[str(ln)] = wn
+
+    conn.close()
+
+    return render_template(
+        "bulk_daily_entry.html",
+        workers=workers,
+        looms=looms,
+        entry_date=entry_date,
+        shift=shift,
+        existing_map=existing_map,
+        last_worker_map=last_worker_map
+    )
+
+
 @app.route("/daily-entry", methods=["GET", "POST"])
 @login_required
 def daily_entry():

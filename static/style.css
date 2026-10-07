@@ -863,3 +863,115 @@ body.dark-theme .kpi-card:hover, body.dark-theme .dashboard-card:hover {
 .kpi-card:hover .kpi-card-icon {
     opacity: 1;
 }
+
+/* ==========================================================================
+   MOBILE OPTIMIZED SUPERVISOR VIEW & BULK MATRIX STYLES
+   ========================================================================== */
+
+.mobile-nav-toggle {
+    display: none;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 6px;
+}
+.mobile-nav-toggle:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.sidebar-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(3px);
+    z-index: 190;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    pointer-events: none;
+}
+.sidebar-backdrop.active {
+    display: block;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 992px) {
+    .sidebar {
+        position: fixed;
+        top: 75px;
+        left: -280px;
+        height: calc(100vh - 75px);
+        z-index: 200;
+        transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 6px 0 25px rgba(0,0,0,0.25);
+    }
+
+    .sidebar.mobile-active {
+        left: 0;
+    }
+
+    .mobile-nav-toggle {
+        display: inline-block;
+    }
+
+    .main {
+        width: 100%;
+        padding: 15px;
+        overflow-y: auto;
+    }
+    
+    .layout {
+        overflow: visible;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        padding: 0 15px;
+        height: 65px;
+    }
+    
+    .navbar-brand span {
+        font-size: 18px;
+    }
+    
+    .sidebar {
+        top: 65px;
+        height: calc(100vh - 65px);
+    }
+    
+    /* Touch friendly form inputs */
+    input[type="text"], input[type="number"], input[type="date"], select, button {
+        min-height: 44px;
+        font-size: 16px !important; /* Prevents mobile Safari auto-zoom */
+    }
+
+    /* Matrix Mobile Scroller */
+    .mobile-touch-scroll {
+        -webkit-overflow-scrolling: touch;
+        overflow-x: auto;
+    }
+    
+    .matrix-submit-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        border-radius: 0;
+        border-top: 2px solid var(--border-color);
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+        padding: 12px 15px;
+    }
+    
+    .matrix-submit-bar button {
+        width: 100%;
+    }
+}

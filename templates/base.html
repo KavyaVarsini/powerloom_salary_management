@@ -22,10 +22,16 @@
     <!-- TOP NAVBAR -->
     <header class="navbar">
         <div class="navbar-brand">
+            <button type="button" class="mobile-nav-toggle" onclick="toggleMobileMenu()" aria-label="Toggle Menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
             <img src="{{ url_for('static', filename='logo_white.png') }}" alt="Logo" class="logo">
             <span>Jaikrishna Weaving Mills</span>
         </div>
     </header>
+
+    <!-- MOBILE SIDEBAR OVERLAY BACKDROP -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleMobileMenu()"></div>
 
     <!-- TOAST POPUP (TOP RIGHT) -->
     <div class="toast-container">
@@ -43,7 +49,7 @@
     <div class="layout">
 
         <!-- SIDEBAR -->
-        <div class="sidebar">
+        <div class="sidebar" id="appSidebar">
 
             <div class="sidebar-category">Overview</div>
             <a href="/"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
@@ -59,6 +65,7 @@
 
             <div class="sidebar-category">Operations</div>
             <a href="/daily-entry"><i class="fa-solid fa-pen-to-square"></i> Daily Entry</a>
+            <a href="/bulk-daily-entry"><i class="fa-solid fa-table-cells"></i> Bulk Matrix Entry</a>
             <a href="/daily-history"><i class="fa-solid fa-calendar-days"></i> Daily History</a>
             
             {% if session.get('role') == 'Admin' %}
@@ -159,6 +166,15 @@
 
             if (typeof window.renderCharts === 'function') {
                 window.renderCharts();
+            }
+        }
+        
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('appSidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (sidebar && backdrop) {
+                sidebar.classList.toggle('mobile-active');
+                backdrop.classList.toggle('active');
             }
         }
         

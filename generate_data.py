@@ -9,9 +9,18 @@ cursor = conn.cursor()
 cursor.execute("SELECT worker_name FROM workers WHERE active_status='Active'")
 db_workers = [row[0] for row in cursor.fetchall()]
 workers = db_workers if db_workers else [
-    "Arun Kumar","Praveen","Sathish","Manikandan","Karthik",
-    "Dinesh","Harish","Lokesh","Bharath","Gokul",
-    "Vignesh","Deepak","Navin","Vijay","Suresh"
+    "Arumugam", "Subramaniam", "Muthusamy", "Chinnasamy", "Periyasamy",
+    "Ramasamy", "Palanisamy", "Velayutham", "Kandasamy", "Govindasamy",
+    "Karuppasamy", "Muthuvel", "Shanmugam", "Thangavel", "Marimuthu",
+    "Chidambaram", "Natarajan", "Krishnasamy", "Doraisamy", "Veerasamy",
+    "Rathinam", "Ponnusamy", "Madasamy", "Munusamy", "Alagappan",
+    "Sellappan", "Duraisamy", "Manickam", "Ranganathan", "Thirumalai",
+    "Alamelu", "Meenakshi", "Kamatchi", "Ponnammal", "Chinnammal",
+    "Periyammal", "Muthulakshmi", "Rajammal", "Lakshmi", "Parvathi",
+    "Saraswathi", "Valli", "Deivanai", "Angammal", "Dhanalakshmi",
+    "Thangammal", "Pappammal", "Kannammal", "Maragatham", "Sivakami",
+    "Bhagyammal", "Gomathi", "Visalakshi", "Soundarammal", "Chellammal",
+    "Muniyammal", "Kuppammal", "Azhagammal", "Veerammal", "Ponnuthayi"
 ]
 
 # Fetch actual active looms from db if they exist, otherwise use default list
