@@ -1,127 +1,495 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Jaikrishna Weaving Mills Portal</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jaikrishna Weaving Mills | Portal Gateway</title>
+    
+    <!-- Exact typography & icons matching website -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        :root {
+            --primary: #104f55;
+            --primary-hover: #0c3e43;
+            --secondary: #1b6f7a;
+            --secondary-hover: #14565f;
+            --accent: #e67e22;
+            --bg-main: #f4f7f8;
+            --card-bg: #ffffff;
+            --text-main: #1d2b2d;
+            --text-muted: #627275;
+            --border-color: #e2ebed;
+            --nav-bg: linear-gradient(135deg, #0d3b3f 0%, #15555c 100%);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
         body {
-            margin: 0;
+            background-color: var(--bg-main);
+            color: var(--text-main);
             font-family: 'Inter', sans-serif;
-            height: 100vh;
-            overflow: hidden;
-            position: relative;
+            font-size: 15px;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background-image: radial-gradient(rgba(16, 79, 85, 0.05) 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
         }
 
-        /* Blurred Background */
-        body::before {
-            content: "";
-            position: fixed;
+        /* TOP NAVBAR (Exact match to website navbar) */
+        .navbar {
+            background: var(--nav-bg);
+            padding: 0 32px;
+            height: 75px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            position: sticky;
             top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url("/static/bg.jpg") no-repeat center center/cover;
-            filter: blur(5px);
-            z-index: -2;
+            z-index: 100;
         }
 
-        /* Corporate Teal Overlay */
-        body::after {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(13, 59, 63, 0.6);
-            z-index: -1;
-        }
-
-        .title {
-            text-align: center;
-            margin-top: 70px;
-            font-size: 34px;
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-size: 22px;
             font-weight: 700;
             color: white;
             letter-spacing: 0.5px;
         }
 
-        .gateway-card {
-            background: rgba(255, 255, 255, 0.95);
-            width: 450px;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            margin: 60px auto;
-            text-align: center;
+        .navbar-brand img {
+            height: 48px;
+            width: auto;
+            object-fit: contain;
         }
 
-        h2 {
-            color: #104f55;
-            font-weight: 700;
-            margin-bottom: 10px;
+        .nav-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.12);
+            color: #e6f3f4;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12.5px;
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
-        p {
-            color: #555;
-            font-size: 15px;
-            margin-bottom: 40px;
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #2ecc71;
+            border-radius: 50%;
+            box-shadow: 0 0 6px #2ecc71;
         }
 
-        .portal-options {
+        /* MAIN CONTENT WRAPPER */
+        .gateway-container {
+            width: 100%;
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            flex-grow: 1;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            align-items: center;
+            justify-content: center;
         }
 
-        .portal-btn {
-            display: block;
+        /* HEADER SECTION */
+        .gateway-header {
+            text-align: center;
+            margin-bottom: 34px;
+        }
+
+        .eyebrow-tag {
+            display: inline-block;
+            font-size: 11.5px;
+            font-weight: 700;
+            color: var(--secondary);
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            background: rgba(27, 111, 122, 0.08);
+            padding: 4px 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(27, 111, 122, 0.15);
+        }
+
+        .gateway-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+            letter-spacing: -0.3px;
+        }
+
+        .gateway-header p {
+            color: var(--text-muted);
+            font-size: 15px;
+            max-width: 540px;
+            margin: 0 auto;
+        }
+
+        /* CARDS GRID (Matches KPI Card Architecture) */
+        .portals-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 28px;
+            width: 100%;
+        }
+
+        .portal-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 32px 28px;
+            box-shadow: 0 6px 18px rgba(16, 79, 85, 0.06), 0 1px 3px rgba(0, 0, 0, 0.03);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
             text-decoration: none;
-            padding: 16px;
-            background-color: #104f55;
-            color: white;
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .portal-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary);
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        .portal-card:hover {
+            transform: translateY(-4px);
+            border-color: #b5d5d8;
+            box-shadow: 0 14px 28px rgba(16, 79, 85, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04);
+        }
+
+        .portal-card:hover::before {
+            opacity: 1;
+        }
+
+        /* Card Top Header */
+        .card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .card-icon-box {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            transition: transform 0.2s ease;
+        }
+
+        .admin-card .card-icon-box {
+            background-color: #e6f3f4;
+            color: var(--primary);
+        }
+
+        .supervisor-card .card-icon-box {
+            background-color: #eaf2f8;
+            color: var(--secondary);
+        }
+
+        .portal-card:hover .card-icon-box {
+            transform: scale(1.08);
+        }
+
+        .role-pill {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        .admin-card .role-pill {
+            background: rgba(16, 79, 85, 0.08);
+            color: var(--primary);
+            border: 1px solid rgba(16, 79, 85, 0.15);
+        }
+
+        .supervisor-card .role-pill {
+            background: rgba(27, 111, 122, 0.08);
+            color: var(--secondary);
+            border: 1px solid rgba(27, 111, 122, 0.15);
+        }
+
+        /* Card Content */
+        .card-title {
+            font-size: 21px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .card-desc {
+            color: var(--text-muted);
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 22px;
+        }
+
+        /* Features List */
+        .features-list {
+            list-style: none;
+            margin-bottom: 26px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .feature-item {
+            font-size: 13.5px;
+            color: #334e52;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feature-item i {
+            color: var(--primary);
+            font-size: 13px;
+        }
+
+        .supervisor-card .feature-item i {
+            color: var(--secondary);
+        }
+
+        /* Button Action */
+        .card-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 13px 18px;
             border-radius: 8px;
-            font-size: 17px;
+            font-size: 14.5px;
             font-weight: 600;
+            color: white;
             transition: all 0.2s ease;
+            margin-top: auto;
         }
 
-        .portal-btn:hover {
-            background-color: #0c3e43;
-            transform: translateY(-2px);
+        .admin-card .card-btn {
+            background-color: var(--primary);
         }
 
-        .portal-btn.supervisor {
-            background-color: #2c3e50;
+        .admin-card:hover .card-btn {
+            background-color: var(--primary-hover);
         }
 
-        .portal-btn.supervisor:hover {
-            background-color: #1a252f;
+        .supervisor-card .card-btn {
+            background-color: var(--secondary);
+        }
+
+        .supervisor-card:hover .card-btn {
+            background-color: var(--secondary-hover);
+        }
+
+        .card-btn i {
+            transition: transform 0.2s ease;
+        }
+
+        .portal-card:hover .card-btn i {
+            transform: translateX(4px);
+        }
+
+        /* FOOTER */
+        .gateway-footer {
+            background: #ffffff;
+            border-top: 1px solid var(--border-color);
+            padding: 20px 24px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 12.5px;
+        }
+
+        .footer-content {
+            max-width: 980px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .footer-security {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0 18px;
+            }
+
+            .navbar-brand {
+                font-size: 18px;
+            }
+
+            .portals-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .gateway-container {
+                padding: 28px 16px;
+            }
         }
     </style>
 </head>
 
 <body>
 
-<div class="title">
-    Jaikrishna Weaving Mills
-</div>
+    <!-- TOP CORPORATE NAVBAR -->
+    <header class="navbar">
+        <div class="navbar-brand">
+            <img src="/static/logo_white.png" alt="Jaikrishna Weaving Mills Logo">
+            <span>Jaikrishna Weaving Mills</span>
+        </div>
+        <div class="nav-status">
+            <span class="status-dot"></span>
+            <span>System Gateway</span>
+        </div>
+    </header>
 
-<div class="gateway-card">
-    <h2>System Gateway</h2>
-    <p>Please select your login section to proceed:</p>
+    <!-- MAIN GATEWAY SECTION -->
+    <main class="gateway-container">
+        
+        <div class="gateway-header">
+            <span class="eyebrow-tag">Enterprise Portal</span>
+            <h1>Select Your Login Section</h1>
+            <p>Access powerloom production tracking, worker salary management, and floor shift metrics.</p>
+        </div>
 
-    <div class="portal-options">
-        <a href="/login/admin" class="portal-btn">
-            Admin Portal
-        </a>
-        <a href="/login/supervisor" class="portal-btn supervisor">
-            Supervisor Portal
-        </a>
-    </div>
-</div>
+        <div class="portals-grid">
+            
+            <!-- Admin Portal Card -->
+            <a href="/login/admin" class="portal-card admin-card" id="adminPortalCard">
+                <div>
+                    <div class="card-top">
+                        <div class="card-icon-box">
+                            <i class="fa-solid fa-user-shield"></i>
+                        </div>
+                        <span class="role-pill">Admin Level</span>
+                    </div>
+
+                    <h2 class="card-title">Admin Portal</h2>
+                    <p class="card-desc">
+                        Full administrative access to manage workers, looms, loan advances, weekly wage disbursements, and reports.
+                    </p>
+
+                    <ul class="features-list">
+                        <li class="feature-item">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span>Worker & Loom Master Management</span>
+                        </li>
+                        <li class="feature-item">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span>Automated Weekly Salary & Loan Deductions</span>
+                        </li>
+                        <li class="feature-item">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span>ML Production Insights & Printable Payslips</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="card-btn">
+                    <span>Enter Admin Portal</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <!-- Supervisor Portal Card -->
+            <a href="/login/supervisor" class="portal-card supervisor-card" id="supervisorPortalCard">
+                <div>
+                    <div class="card-top">
+                        <div class="card-icon-box">
+                            <i class="fa-solid fa-industry"></i>
+                        </div>
+                        <span class="role-pill">Supervisor Level</span>
+                    </div>
+
+                    <h2 class="card-title">Supervisor Portal</h2>
+                    <p class="card-desc">
+                        Workshop floor operations to log daily shift production, loom run hours, and operator attendance.
+                    </p>
+
+                    <ul class="features-list">
+                        <li class="feature-item">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span>Daily Shift Production Entry</span>
+                        </li>
+                        <li class="feature-item">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span>Bulk Matrix Meter Recording</span>
+                        </li>
+                        <li class="feature-item">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span>Floor Worker Attendance & Runtime Tracking</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="card-btn">
+                    <span>Enter Supervisor Portal</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </div>
+            </a>
+
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="gateway-footer">
+        <div class="footer-content">
+            <div class="footer-security">
+                <i class="fa-solid fa-lock"></i>
+                <span>Secure Industrial Session • 256-Bit SSL Protection</span>
+            </div>
+            <div>
+                <strong>Jai Krishna Weaving Mills</strong> &nbsp;|&nbsp; 
+                1/501 - A1, Kallimedu Thottam, Paduvampalli, Sulur, Coimbatore - 641 659 &nbsp;|&nbsp; 
+                <strong>GSTIN:</strong> 33AAQFJ1452K1Z7
+            </div>
+        </div>
+    </footer>
 
 </body>
 </html>

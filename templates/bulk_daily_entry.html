@@ -2,7 +2,12 @@
 {% block content %}
 
 <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
-    <h2>Bulk Daily Entry Matrix</h2>
+    <div>
+        <h2 style="margin-bottom: 4px;">Bulk Daily Production Entry</h2>
+        <p style="color: var(--text-muted); font-size: 13.5px; margin: 0;">
+            Manual floor allocation & batch loom shift logging.
+        </p>
+    </div>
     
     <!-- MODE SWITCH TABS -->
     <div class="entry-mode-tabs" style="display: flex; gap: 8px; background: var(--border-color); padding: 4px; border-radius: 10px;">
@@ -15,68 +20,144 @@
     </div>
 </div>
 
-<!-- MATRIX SELECTOR FILTER CARD -->
-<div class="form-card" style="max-width: 100%; width: 100%; margin-bottom: 25px; padding: 20px;">
+<!-- 1. DATE & SHIFT SELECTOR -->
+<div class="form-card" style="max-width: 100%; width: 100%; margin-bottom: 20px; padding: 18px 24px; border-radius: 12px;">
     <form id="matrixFilterForm" method="GET" action="/bulk-daily-entry" style="display: flex; flex-direction: row; gap: 20px; align-items: flex-end; flex-wrap: wrap; background: none; box-shadow: none; padding: 0; max-width: 100%;">
         
         <div class="form-row" style="margin-bottom: 0; min-width: 180px; flex: 1;">
-            <label style="margin-top: 0; font-size: 14px; font-weight: bold; color: var(--secondary);">Production Date</label>
-            <input type="date" name="date" value="{{ entry_date }}" required onchange="document.getElementById('matrixFilterForm').submit();" style="margin-top: 5px; padding: 10px; font-size: 15px;">
+            <label style="margin-top: 0; font-size: 13.5px; font-weight: 700; color: var(--primary);">Production Date</label>
+            <input type="date" name="date" value="{{ entry_date }}" required onchange="document.getElementById('matrixFilterForm').submit();" style="margin-top: 5px; padding: 10px; font-size: 14.5px;">
         </div>
 
         <div class="form-row" style="margin-bottom: 0; min-width: 180px; flex: 1;">
-            <label style="margin-top: 0; font-size: 14px; font-weight: bold; color: var(--secondary);">Shift</label>
-            <select name="shift" onchange="document.getElementById('matrixFilterForm').submit();" style="margin-top: 5px; padding: 10px; font-size: 15px;">
+            <label style="margin-top: 0; font-size: 13.5px; font-weight: 700; color: var(--primary);">Shift</label>
+            <select name="shift" onchange="document.getElementById('matrixFilterForm').submit();" style="margin-top: 5px; padding: 10px; font-size: 14.5px;">
                 <option value="Morning" {% if shift == 'Morning' %}selected{% endif %}>🌅 Morning Shift</option>
                 <option value="Night" {% if shift == 'Night' %}selected{% endif %}>🌙 Night Shift</option>
             </select>
         </div>
 
-        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-left: auto;">
-            <button type="button" onclick="autoFillLastWorkers()" class="secondary-btn" style="padding: 10px 16px; font-size: 13px; font-weight: 600; background-color: #e8f4f4; color: var(--primary); border-color: var(--secondary);">
-                <i class="fa-solid fa-user-check"></i> Auto-Fill Loom Workers
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-left: auto; align-items: center;">
+            <span style="font-size: 12px; font-weight: 600; color: #155724; background: #e8f5e9; border: 1px solid #c8e6c9; padding: 6px 12px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px;">
+                <i class="fa-solid fa-shield-halved"></i> Manual Mode (Recorded Protected)
+            </span>
+            <button type="button" onclick="copyLastShiftRoster()" class="secondary-btn" title="Populate last known operators for unrecorded looms" style="padding: 9px 14px; font-size: 13px; font-weight: 600; background-color: #f0f7f7; color: var(--primary); border: 1px solid #b5d5d8;">
+                <i class="fa-solid fa-clock-rotate-left"></i> Copy Last Shift Roster
             </button>
-            <button type="button" onclick="setAllHours(12.0)" class="secondary-btn" style="padding: 10px 16px; font-size: 13px; font-weight: 600;">
-                <i class="fa-solid fa-clock"></i> Set All 12.0 Hrs
-            </button>
-            <button type="button" onclick="clearMatrixInputs()" class="secondary-btn" style="padding: 10px 16px; font-size: 13px; font-weight: 600; background-color: #f8d7da; color: #721c24; border-color: #f5c6cb;">
-                <i class="fa-solid fa-eraser"></i> Clear Unsaved
+            <button type="button" onclick="clearUnsavedData()" class="secondary-btn" style="padding: 9px 14px; font-size: 13px; font-weight: 600; background-color: #fff; color: #e74c3c; border: 1px solid #fadbd8;" title="Clear newly entered workers and meters. Already recorded rows are protected.">
+                <i class="fa-solid fa-eraser"></i> Clear Unsaved Data
             </button>
         </div>
     </form>
 </div>
 
-<!-- MATRIX INPUT FORM -->
+<!-- 2. QUICK LOOM GANG / BLOCK ALLOCATOR -->
+<div class="form-card" style="max-width: 100%; width: 100%; margin-bottom: 22px; padding: 20px 24px; border-radius: 12px; border-left: 4px solid var(--primary); background: #ffffff;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 32px; height: 32px; border-radius: 8px; background: #e6f3f4; color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 15px;">
+                <i class="fa-solid fa-users-gear"></i>
+            </div>
+            <div>
+                <strong style="color: var(--primary); font-size: 15px;">Loom Gang / Block Allocator</strong>
+                <span style="font-size: 12.5px; color: var(--text-muted); margin-left: 6px;">
+                    Assign 1 weaver to a set of looms (e.g., 4 to 8 looms). Already recorded looms are protected.
+                </span>
+            </div>
+        </div>
+        <div id="allocatorFeedback" style="font-size: 13px; font-weight: 600; color: var(--primary); display: none;"></div>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
+        
+        <!-- Step 1: Select Worker -->
+        <div style="min-width: 220px; flex: 1;">
+            <select id="gangWorkerSelect" style="width: 100%; padding: 10px 12px; font-size: 14px; border-radius: 8px; border: 1px solid var(--border-color); font-weight: 500;">
+                <option value="">-- Choose Present Worker --</option>
+                {% for worker in workers %}
+                <option value="{{ worker[0] }}">{{ worker[0] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Step 2: By Loom Number Range -->
+        <div style="display: flex; align-items: center; gap: 8px; background: #f8fafb; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+            <span style="font-size: 13px; font-weight: 600; color: var(--secondary);">Loom Range:</span>
+            <input type="number" id="gangRangeFrom" placeholder="From" style="width: 75px; padding: 7px 8px; font-size: 13.5px; border-radius: 6px; border: 1px solid #cddde0; text-align: center;">
+            <span style="color: var(--text-muted); font-size: 13px;">to</span>
+            <input type="number" id="gangRangeTo" placeholder="To" style="width: 75px; padding: 7px 8px; font-size: 13.5px; border-radius: 6px; border: 1px solid #cddde0; text-align: center;">
+            <button type="button" onclick="assignWorkerByRange()" class="main-btn" style="padding: 7px 14px; font-size: 13px; border-radius: 6px; background-color: var(--primary);">
+                <i class="fa-solid fa-arrows-split-up-and-left"></i> Assign Range
+            </button>
+        </div>
+
+        <span style="color: var(--text-muted); font-size: 13px; font-weight: 600;">OR</span>
+
+        <!-- Step 3: By Checked Looms in Table -->
+        <button type="button" onclick="assignWorkerToChecked()" class="secondary-btn" style="padding: 9px 16px; font-size: 13px; font-weight: 600; background-color: #eef7f8; color: var(--primary); border: 1px solid #b5d5d8;">
+            <i class="fa-solid fa-check-double"></i> Assign to Checked (<span id="checkedLoomsCount">0</span>)
+        </button>
+
+        <!-- Quick standard hours -->
+        <button type="button" onclick="setAllHours(12.0)" class="secondary-btn" style="padding: 9px 14px; font-size: 13px; font-weight: 600; margin-left: auto;">
+            <i class="fa-solid fa-clock"></i> Set All 12.0 Hrs
+        </button>
+    </div>
+</div>
+
+<!-- 3. MATRIX INPUT FORM -->
 <form method="POST" action="/bulk-daily-entry" id="bulkMatrixPostForm">
     <input type="hidden" name="date" value="{{ entry_date }}">
     <input type="hidden" name="shift" value="{{ shift }}">
 
-    <div class="table-card mobile-touch-scroll" style="padding: 0; overflow-x: auto; margin-bottom: 25px;">
-        <table class="no-datatable" style="width: 100%; border-collapse: collapse; min-width: 650px;">
+    <div class="table-card mobile-touch-scroll" style="padding: 0; overflow-x: auto; margin-bottom: 25px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 14px rgba(0,0,0,0.03);">
+        <table class="no-datatable" style="width: 100%; border-collapse: collapse; min-width: 720px;">
             <thead>
-                <tr style="background: var(--bg-main); border-bottom: 2px solid var(--border-color);">
-                    <th style="padding: 12px 16px; text-align: center; width: 90px;">Loom #</th>
-                    <th style="padding: 12px 16px; text-align: left;">Assigned Worker</th>
-                    <th style="padding: 12px 16px; text-align: left; width: 180px;">Meters Weaved</th>
-                    <th style="padding: 12px 16px; text-align: left; width: 150px;">Run Time (Hrs)</th>
-                    <th style="padding: 12px 16px; text-align: center; width: 110px;">Status</th>
+                <tr style="background: #edf4f5; border-bottom: 2px solid var(--border-color);">
+                    <th style="padding: 12px 14px; text-align: center; width: 45px;">
+                        <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this)" title="Select all unrecorded looms">
+                    </th>
+                    <th style="padding: 12px 14px; text-align: center; width: 90px; color: var(--primary); font-size: 13.5px;">Loom #</th>
+                    <th style="padding: 12px 16px; text-align: left; color: var(--primary); font-size: 13.5px;">Assigned Worker</th>
+                    <th style="padding: 12px 16px; text-align: left; width: 170px; color: var(--primary); font-size: 13.5px;">Meters Weaved</th>
+                    <th style="padding: 12px 16px; text-align: left; width: 150px; color: var(--primary); font-size: 13.5px;">Run Time (Hrs)</th>
+                    <th style="padding: 12px 16px; text-align: center; width: 120px; color: var(--primary); font-size: 13.5px;">Status</th>
                 </tr>
             </thead>
             <tbody>
                 {% for loom in looms %}
                 {% set loom_num = loom[0] %}
                 {% set existing = existing_map.get(loom_num) %}
+                {% set is_recorded = true if existing else false %}
                 {% set last_worker = last_worker_map.get(loom_num) %}
-                {% set default_worker = existing.worker_name if existing else (last_worker if last_worker else '') %}
-                <tr style="border-bottom: 1px solid var(--border-color); transition: background 0.15s;" class="matrix-row" data-default-worker="{{ default_worker }}">
-                    <td style="text-align: center; font-weight: bold; font-size: 15px; color: var(--primary); padding: 12px 16px;">
-                        <span style="background: var(--bg-main); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border-color); display: inline-block;">
+                {% set default_worker = existing.worker_name if existing else '' %}
+                
+                <tr style="border-bottom: 1px solid var(--border-color); transition: background 0.2s; {% if is_recorded %}background-color: #fbfdfc;{% endif %}" 
+                    class="matrix-row {% if is_recorded %}row-recorded{% endif %}" 
+                    id="row-loom-{{ loom_num }}"
+                    data-loom="{{ loom_num }}"
+                    data-is-recorded="{{ 'true' if is_recorded else 'false' }}"
+                    data-original-worker="{{ existing.worker_name if existing else '' }}"
+                    data-original-output="{{ existing.output_quantity if existing else '' }}"
+                    data-original-runtime="{{ existing.run_time_hours if existing else 12.0 }}"
+                    data-last-worker="{{ last_worker if last_worker else '' }}">
+                    
+                    <!-- Row Checkbox -->
+                    <td style="text-align: center; padding: 10px 14px;">
+                        <input type="checkbox" class="loom-row-checkbox" value="{{ loom_num }}" onchange="updateCheckedCount()">
+                    </td>
+
+                    <!-- Loom Number -->
+                    <td style="text-align: center; font-weight: bold; font-size: 15px; color: var(--primary); padding: 10px 14px;">
+                        <span style="background: #f4f8f8; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border-color); display: inline-block;">
                             {{ loom_num }}
                         </span>
                         <input type="hidden" name="loom_number[]" value="{{ loom_num }}">
                     </td>
+
+                    <!-- Assigned Worker Dropdown -->
                     <td style="padding: 8px 16px;">
-                        <select name="worker_name[]" class="matrix-worker-select" style="width: 100%; padding: 10px; font-size: 14px; border-radius: 8px; border: 1px solid var(--border-color);">
+                        <select name="worker_name[]" class="matrix-worker-select" onchange="onWorkerChange(this)" style="width: 100%; padding: 9px 12px; font-size: 14px; border-radius: 8px; border: 1px solid var(--border-color); background: #ffffff;">
                             <option value="">-- Select Worker --</option>
                             {% for worker in workers %}
                             <option value="{{ worker[0] }}" {% if default_worker and default_worker == worker[0] %}selected{% endif %}>
@@ -85,24 +166,26 @@
                             {% endfor %}
                         </select>
                     </td>
+
+                    <!-- Meters Weaved -->
                     <td style="padding: 8px 16px;">
-                        <input type="number" name="output_quantity[]" class="matrix-output-input" min="0" placeholder="e.g. 140" value="{{ existing.output_quantity if existing else '' }}" style="width: 100%; padding: 10px; font-size: 14px; border-radius: 8px; border: 1px solid var(--border-color);">
+                        <input type="number" name="output_quantity[]" class="matrix-output-input" min="0" placeholder="e.g. 140" value="{{ existing.output_quantity if existing else '' }}" style="width: 100%; padding: 9px 12px; font-size: 14px; border-radius: 8px; border: 1px solid var(--border-color); background: #ffffff;">
                     </td>
+
+                    <!-- Run Time Hours -->
                     <td style="padding: 8px 16px;">
-                        <input type="number" step="0.1" name="run_time_hours[]" class="matrix-runtime-input" min="0" max="24" value="{{ existing.run_time_hours if existing else 12.0 }}" style="width: 100%; padding: 10px; font-size: 14px; border-radius: 8px; border: 1px solid var(--border-color);">
+                        <input type="number" step="0.1" name="run_time_hours[]" class="matrix-runtime-input" min="0" max="24" value="{{ existing.run_time_hours if existing else 12.0 }}" style="width: 100%; padding: 9px 12px; font-size: 14px; border-radius: 8px; border: 1px solid var(--border-color); background: #ffffff;">
                     </td>
+
+                    <!-- Status Badge -->
                     <td style="text-align: center; padding: 8px 16px;">
-                        {% if existing %}
-                        <span class="badge" style="background: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600;">
+                        {% if is_recorded %}
+                        <span class="badge row-status-badge" style="background: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600;" title="Saved in database for this date and shift">
                             <i class="fa-solid fa-check"></i> Recorded
                         </span>
-                        {% elif last_worker %}
-                        <span class="badge" style="background: #e8f4f4; color: var(--primary); border: 1px solid #cddde0; padding: 4px 8px; border-radius: 6px; font-size: 12px;">
-                            Assigned
-                        </span>
                         {% else %}
-                        <span class="badge" style="background: #f8f9fa; color: #6c757d; border: 1px solid #dee2e6; padding: 4px 8px; border-radius: 6px; font-size: 12px;">
-                            Pending
+                        <span class="badge row-status-badge" style="background: #f8f9fa; color: #6c757d; border: 1px solid #dee2e6; padding: 4px 8px; border-radius: 6px; font-size: 12px;">
+                            Unassigned
                         </span>
                         {% endif %}
                     </td>
@@ -112,45 +195,307 @@
         </table>
     </div>
 
-    <!-- FLOATING / BOTTOM SUBMIT BAR FOR MOBILE & DESKTOP -->
-    <div class="matrix-submit-bar" style="position: sticky; bottom: 20px; z-index: 90; background: var(--card-bg); border: 1px solid var(--border-color); padding: 15px 25px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+    <!-- FLOATING SUBMIT BAR -->
+    <div class="matrix-submit-bar" style="position: sticky; bottom: 20px; z-index: 90; background: var(--card-bg); border: 1px solid var(--border-color); padding: 15px 25px; border-radius: 12px; box-shadow: 0 8px 24px rgba(16, 79, 85, 0.12); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
         <div style="font-size: 14px; color: var(--text-muted);">
-            <strong style="color: var(--primary);" id="activeCountDisplay">0</strong> looms ready for submission.
+            <strong style="color: var(--primary); font-size: 16px;" id="activeCountDisplay">0</strong> looms filled & ready for shift submission.
+            <span style="font-size: 12.5px; margin-left: 8px; color: #8da2a6;">(Unassigned rows will be safely skipped)</span>
         </div>
-        <button type="submit" class="main-btn" style="padding: 12px 30px; font-size: 15px; font-weight: bold; background: linear-gradient(135deg, #27ae60 0%, #2196f3 100%); border: none;">
-            <i class="fa-solid fa-cloud-arrow-up"></i> Submit All Matrix Entries
-        </button>
+        
+        <div style="display: flex; gap: 12px; align-items: center;">
+            <button type="button" onclick="clearUnsavedMetersOnly()" class="secondary-btn" style="padding: 10px 16px; font-size: 13.5px; font-weight: 600;" title="Clears only unsaved meters. Recorded meters are protected.">
+                <i class="fa-solid fa-eraser"></i> Clear Unsaved Meters
+            </button>
+            <button type="submit" class="main-btn" style="padding: 12px 28px; font-size: 15px; font-weight: bold; background: linear-gradient(135deg, #104f55 0%, #1b6f7a 100%); border: none; color: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(16, 79, 85, 0.25);">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Submit All Matrix Entries
+            </button>
+        </div>
     </div>
 </form>
 
+<style>
+    @keyframes highlightPulse {
+        0% { background-color: #d1fae5; }
+        100% { background-color: transparent; }
+    }
+    .row-highlight {
+        animation: highlightPulse 1.2s ease-out;
+    }
+    .row-recorded {
+        border-left: 3px solid #28a745;
+    }
+</style>
+
 <script>
-    function autoFillLastWorkers() {
+    // 1. ASSIGN WORKER BY LOOM RANGE (Protects already recorded rows)
+    function assignWorkerByRange() {
+        const workerSelect = document.getElementById('gangWorkerSelect');
+        const workerName = workerSelect.value;
+        const fromLoom = parseInt(document.getElementById('gangRangeFrom').value, 10);
+        const toLoom = parseInt(document.getElementById('gangRangeTo').value, 10);
+
+        if (!workerName) {
+            alert("Please choose a worker first from the 'Choose Present Worker' dropdown.");
+            workerSelect.focus();
+            return;
+        }
+
+        if (isNaN(fromLoom) || isNaN(toLoom)) {
+            alert("Please enter both 'From' and 'To' loom numbers (e.g. From: 101, To: 104).");
+            return;
+        }
+
+        if (fromLoom > toLoom) {
+            alert("'From' loom number cannot be greater than 'To' loom number.");
+            return;
+        }
+
+        let assignedCount = 0;
+        let protectedRecordedCount = 0;
         const rows = document.querySelectorAll('.matrix-row');
         rows.forEach(row => {
-            const select = row.querySelector('.matrix-worker-select');
-            const defaultW = row.getAttribute('data-default-worker');
-            if (select && defaultW) {
-                select.value = defaultW;
+            const loomNum = parseInt(row.getAttribute('data-loom'), 10);
+            if (loomNum >= fromLoom && loomNum <= toLoom) {
+                const isRecorded = row.getAttribute('data-is-recorded') === 'true';
+                
+                // Do not overwrite already recorded database records with a bulk range sweep!
+                if (isRecorded) {
+                    protectedRecordedCount++;
+                    return;
+                }
+
+                const select = row.querySelector('.matrix-worker-select');
+                if (select) {
+                    select.value = workerName;
+                    updateRowStatus(row, workerName);
+                    triggerHighlight(row);
+                    assignedCount++;
+                }
             }
         });
+
+        let msg = `Assigned "${workerName}" to ${assignedCount} looms (Loom ${fromLoom} - ${toLoom}).`;
+        if (protectedRecordedCount > 0) {
+            msg += ` (${protectedRecordedCount} already recorded looms were kept protected).`;
+        }
+        showAllocatorFeedback(msg);
         updateActiveCount();
     }
 
-    function setAllHours(hrs) {
-        document.querySelectorAll('.matrix-runtime-input').forEach(input => {
-            input.value = hrs;
+    // 2. ASSIGN WORKER TO CHECKED LOOMS
+    function assignWorkerToChecked() {
+        const workerSelect = document.getElementById('gangWorkerSelect');
+        const workerName = workerSelect.value;
+
+        if (!workerName) {
+            alert("Please choose a worker first from the 'Choose Present Worker' dropdown.");
+            workerSelect.focus();
+            return;
+        }
+
+        const checkedBoxes = document.querySelectorAll('.loom-row-checkbox:checked');
+        if (checkedBoxes.length === 0) {
+            alert("Please check at least one loom in the table to assign.");
+            return;
+        }
+
+        let assignedCount = 0;
+        checkedBoxes.forEach(box => {
+            const row = box.closest('.matrix-row');
+            if (row) {
+                const select = row.querySelector('.matrix-worker-select');
+                if (select) {
+                    select.value = workerName;
+                    updateRowStatus(row, workerName);
+                    triggerHighlight(row);
+                    assignedCount++;
+                }
+                box.checked = false;
+            }
         });
+
+        document.getElementById('selectAllCheckbox').checked = false;
+        updateCheckedCount();
+        showAllocatorFeedback(`Assigned "${workerName}" to ${assignedCount} selected looms.`);
+        updateActiveCount();
     }
 
-    function clearMatrixInputs() {
-        if (confirm("Clear all unsaved inputs in the matrix?")) {
-            document.querySelectorAll('.matrix-worker-select').forEach(select => {
-                select.selectedIndex = 0;
-            });
-            document.querySelectorAll('.matrix-output-input').forEach(input => {
-                input.value = '';
-            });
+    // 3. OPTIONAL "COPY LAST SHIFT ROSTER" (Only fills unrecorded looms!)
+    function copyLastShiftRoster() {
+        if (!confirm("Load last known worker assignments for unrecorded looms? (Already recorded looms will NOT be changed)")) {
+            return;
         }
+
+        let filledCount = 0;
+        const rows = document.querySelectorAll('.matrix-row');
+        rows.forEach(row => {
+            const isRecorded = row.getAttribute('data-is-recorded') === 'true';
+            
+            // Protect already recorded entries!
+            if (!isRecorded) {
+                const select = row.querySelector('.matrix-worker-select');
+                const lastWorker = row.getAttribute('data-last-worker');
+                if (select && lastWorker) {
+                    select.value = lastWorker;
+                    updateRowStatus(row, lastWorker);
+                    triggerHighlight(row);
+                    filledCount++;
+                }
+            }
+        });
+
+        showAllocatorFeedback(`Loaded last shift roster for ${filledCount} unassigned looms.`);
+        updateActiveCount();
+    }
+
+    // 4. SMART "CLEAR UNSAVED DATA": Clears both Worker & Meters on unsaved rows, but PROTECTS already recorded rows!
+    function clearUnsavedData() {
+        let clearedCount = 0;
+        const rows = document.querySelectorAll('.matrix-row');
+        rows.forEach(row => {
+            const isRecorded = row.getAttribute('data-is-recorded') === 'true';
+
+            if (isRecorded) {
+                // RESTORE to original saved database values if they were modified
+                const origWorker = row.getAttribute('data-original-worker') || '';
+                const origOutput = row.getAttribute('data-original-output') || '';
+                const origRuntime = row.getAttribute('data-original-runtime') || '12.0';
+
+                const workerSelect = row.querySelector('.matrix-worker-select');
+                const outputInput = row.querySelector('.matrix-output-input');
+                const runtimeInput = row.querySelector('.matrix-runtime-input');
+
+                if (workerSelect) workerSelect.value = origWorker;
+                if (outputInput) outputInput.value = origOutput;
+                if (runtimeInput) runtimeInput.value = origRuntime;
+                updateRowStatus(row, origWorker);
+            } else {
+                // CLEAR UNSAVED ROW COMPLETELY: BOTH worker name AND meters marked!
+                const workerSelect = row.querySelector('.matrix-worker-select');
+                const outputInput = row.querySelector('.matrix-output-input');
+                const runtimeInput = row.querySelector('.matrix-runtime-input');
+                const checkbox = row.querySelector('.loom-row-checkbox');
+
+                if (workerSelect) workerSelect.value = '';
+                if (outputInput) outputInput.value = '';
+                if (runtimeInput) runtimeInput.value = '12.0';
+                if (checkbox) checkbox.checked = false;
+
+                updateRowStatus(row, '');
+                clearedCount++;
+            }
+        });
+
+        document.getElementById('selectAllCheckbox').checked = false;
+        updateCheckedCount();
+        showAllocatorFeedback(`Cleared unsaved workers & meters for ${clearedCount} looms. Recorded rows kept protected.`);
+        updateActiveCount();
+    }
+
+    // 5. CLEAR UNSAVED METERS ONLY: Protects already recorded meters!
+    function clearUnsavedMetersOnly() {
+        let clearedCount = 0;
+        const rows = document.querySelectorAll('.matrix-row');
+        rows.forEach(row => {
+            const isRecorded = row.getAttribute('data-is-recorded') === 'true';
+            const outputInput = row.querySelector('.matrix-output-input');
+
+            if (!isRecorded) {
+                if (outputInput) {
+                    outputInput.value = '';
+                    clearedCount++;
+                }
+            } else {
+                // Restore original recorded output if modified
+                const origOutput = row.getAttribute('data-original-output') || '';
+                if (outputInput) outputInput.value = origOutput;
+            }
+        });
+
+        updateActiveCount();
+        showAllocatorFeedback(`Cleared unsaved meters for ${clearedCount} looms. Recorded meters kept safe.`);
+    }
+
+    // Helper: Set All Hours
+    function setAllHours(hrs) {
+        document.querySelectorAll('.matrix-runtime-input').forEach(input => {
+            const row = input.closest('.matrix-row');
+            // If already recorded, preserve its recorded runtime
+            if (row && row.getAttribute('data-is-recorded') === 'true') {
+                return;
+            }
+            input.value = hrs;
+        });
+        showAllocatorFeedback(`Set unrecorded loom run times to ${hrs} hours.`);
+    }
+
+    // Checkbox toggles
+    function toggleSelectAll(masterBox) {
+        document.querySelectorAll('.loom-row-checkbox').forEach(box => {
+            const row = box.closest('.matrix-row');
+            // Only select unrecorded rows to prevent bulk accidents on saved records
+            if (row && row.getAttribute('data-is-recorded') === 'true') {
+                box.checked = false;
+            } else {
+                box.checked = masterBox.checked;
+            }
+        });
+        updateCheckedCount();
+    }
+
+    function updateCheckedCount() {
+        const count = document.querySelectorAll('.loom-row-checkbox:checked').length;
+        document.getElementById('checkedLoomsCount').innerText = count;
+    }
+
+    function onWorkerChange(select) {
+        const row = select.closest('.matrix-row');
+        updateRowStatus(row, select.value);
+        updateActiveCount();
+    }
+
+    function updateRowStatus(row, workerName) {
+        const badge = row.querySelector('.row-status-badge');
+        if (!badge) return;
+
+        const isRecorded = row.getAttribute('data-is-recorded') === 'true';
+        
+        // If it's already in the database
+        if (isRecorded) {
+            badge.style.background = "#d4edda";
+            badge.style.color = "#155724";
+            badge.style.border = "1px solid #c3e6cb";
+            badge.innerHTML = '<i class="fa-solid fa-check"></i> Recorded';
+            return;
+        }
+
+        // For new / unrecorded rows
+        if (workerName && workerName.trim() !== "") {
+            badge.style.background = "#e0f2fe";
+            badge.style.color = "#0369a1";
+            badge.style.border = "1px solid #bae6fd";
+            badge.innerHTML = '<i class="fa-solid fa-user-check"></i> Ready';
+        } else {
+            badge.style.background = "#f8f9fa";
+            badge.style.color = "#6c757d";
+            badge.style.border = "1px solid #dee2e6";
+            badge.innerHTML = 'Unassigned';
+        }
+    }
+
+    function triggerHighlight(row) {
+        row.classList.remove('row-highlight');
+        void row.offsetWidth; // trigger reflow
+        row.classList.add('row-highlight');
+    }
+
+    function showAllocatorFeedback(msg) {
+        const fb = document.getElementById('allocatorFeedback');
+        fb.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${msg}`;
+        fb.style.display = 'block';
+        setTimeout(() => {
+            fb.style.display = 'none';
+        }, 4500);
     }
 
     function updateActiveCount() {
@@ -171,6 +516,12 @@
         document.querySelectorAll('.matrix-worker-select, .matrix-output-input').forEach(elem => {
             elem.addEventListener('change', updateActiveCount);
             elem.addEventListener('input', updateActiveCount);
+        });
+
+        // Initialize status badges on load
+        document.querySelectorAll('.matrix-row').forEach(row => {
+            const worker = row.querySelector('.matrix-worker-select').value;
+            updateRowStatus(row, worker);
         });
     });
 </script>

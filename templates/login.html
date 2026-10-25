@@ -1,164 +1,452 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Manager Login</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ role_title }} Login | Jaikrishna Weaving Mills</title>
+    
+    <!-- Typography & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        :root {
+            --primary: #104f55;
+            --primary-hover: #0c3e43;
+            --secondary: #1b6f7a;
+            --secondary-hover: #14565f;
+            --bg-main: #f4f7f8;
+            --card-bg: #ffffff;
+            --text-main: #1d2b2d;
+            --text-muted: #627275;
+            --border-color: #e2ebed;
+            --nav-bg: linear-gradient(135deg, #0d3b3f 0%, #15555c 100%);
+            
+            {% if role_title == 'Admin' %}
+            --btn-bg: #104f55;
+            --btn-hover: #0c3e43;
+            --badge-bg: rgba(16, 79, 85, 0.08);
+            --badge-color: #104f55;
+            --badge-border: rgba(16, 79, 85, 0.2);
+            {% else %}
+            --btn-bg: #1b6f7a;
+            --btn-hover: #14565f;
+            --badge-bg: rgba(27, 111, 122, 0.08);
+            --badge-color: #1b6f7a;
+            --badge-border: rgba(27, 111, 122, 0.2);
+            {% endif %}
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
         body {
-            margin: 0;
+            background-color: var(--bg-main);
+            color: var(--text-main);
             font-family: 'Inter', sans-serif;
-            height: 100vh;
-            overflow: hidden;
-            position: relative;
+            font-size: 15px;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background-image: radial-gradient(rgba(16, 79, 85, 0.05) 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
         }
 
-        /* Blurred Background */
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url("/static/bg.jpg") no-repeat center center/cover;
-            filter: blur(5px);
-            z-index: -2;
+        /* TOP NAVBAR */
+        .navbar {
+            background: var(--nav-bg);
+            padding: 0 32px;
+            height: 75px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
         }
 
-        /* Corporate Teal Overlay */
-        body::after {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(13, 59, 63, 0.6);
-            z-index: -1;
-        }
-
-        .title {
-            text-align: center;
-            margin-top: 70px;
-            font-size: 34px;
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-size: 22px;
             font-weight: 700;
             color: white;
             letter-spacing: 0.5px;
+            text-decoration: none;
         }
 
-        .login-card {
-            background: rgba(255, 255, 255, 0.95);
-            width: 400px;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            margin: 60px auto;
+        .navbar-brand img {
+            height: 48px;
+            width: auto;
+            object-fit: contain;
         }
 
-        h2 {
-            text-align: center;
-            color: #104f55;
-            font-weight: 700;
-            margin-bottom: 30px;
+        .nav-link-back {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #e6f3f4;
+            font-size: 13.5px;
+            font-weight: 500;
+            text-decoration: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            transition: background 0.2s ease;
         }
 
-        input, select {
+        .nav-link-back:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+        }
+
+        /* MAIN CONTAINER */
+        .login-container {
             width: 100%;
-            padding: 12px;
-            margin-bottom: 25px;
-            border-radius: 8px;
-            border: 1px solid #cddde0;
-            font-size: 15px;
-            box-sizing: border-box;
-            font-family: inherit;
-            transition: all 0.2s ease;
+            max-width: 440px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
-        input:focus, select:focus {
-            outline: none;
-            border-color: #1b6f7a;
-            box-shadow: 0 0 0 3px rgba(27, 111, 122, 0.15);
-        }
-
-        .password-box {
+        /* CARD (Matches Website White Card Theme) */
+        .login-card {
+            width: 100%;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 36px 32px;
+            box-shadow: 0 8px 24px rgba(16, 79, 85, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
             position: relative;
         }
 
-        .password-box input {
-            padding-right: 40px;
+        .card-header-badge {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
         }
 
-        .eye {
-            position: absolute;
-            right: 12px;
-            top: 35%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            font-size: 18px;
+        .role-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            padding: 4px 12px;
+            border-radius: 6px;
+            background: var(--badge-bg);
+            color: var(--badge-color);
+            border: 1px solid var(--badge-border);
         }
 
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: #104f55;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
+        .ssl-indicator {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .ssl-indicator i {
+            color: #198754;
+        }
+
+        .login-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+        }
+
+        .login-desc {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 26px;
+        }
+
+        /* Form Inputs */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
             font-weight: 600;
-            cursor: pointer;
+            color: #2c4245;
+            margin-bottom: 7px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            color: #8da2a6;
+            font-size: 14px;
+            transition: color 0.2s ease;
+        }
+
+        .form-input {
+            width: 100%;
+            background-color: #ffffff;
+            border: 1px solid #cddde0;
+            border-radius: 8px;
+            padding: 12px 42px 12px 40px;
+            font-size: 14.5px;
+            color: var(--text-main);
             font-family: inherit;
+            outline: none;
             transition: all 0.2s ease;
         }
 
-        button:hover {
-            background-color: #0c3e43;
+        .form-input::placeholder {
+            color: #9cb0b4;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(16, 79, 85, 0.12);
+        }
+
+        .input-wrapper:focus-within .input-icon {
+            color: var(--primary);
+        }
+
+        .eye-toggle {
+            position: absolute;
+            right: 14px;
+            color: #8da2a6;
+            cursor: pointer;
+            font-size: 15px;
+            transition: color 0.2s ease;
+            user-select: none;
+        }
+
+        .eye-toggle:hover {
+            color: var(--text-main);
+        }
+
+        /* Submit Button */
+        .login-btn {
+            width: 100%;
+            background-color: var(--btn-bg);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            padding: 13px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 26px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(16, 79, 85, 0.2);
+        }
+
+        .login-btn:hover {
+            background-color: var(--btn-hover);
             transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(16, 79, 85, 0.25);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Flash Error Box */
+        .alert-danger {
+            background-color: #fdf2f2;
+            border: 1px solid #f8b4b4;
+            color: #9b1c1c;
+            padding: 11px 14px;
+            border-radius: 8px;
+            font-size: 13.5px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Back Link at bottom of card */
+        .back-link-wrapper {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 18px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .back-link {
+            color: var(--secondary);
+            font-size: 13.5px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+
+        /* FOOTER */
+        .gateway-footer {
+            background: #ffffff;
+            border-top: 1px solid var(--border-color);
+            padding: 18px 24px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .footer-content {
+            max-width: 980px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            align-items: center;
         }
     </style>
 </head>
 
 <body>
 
-<div class="title">
-    Jaikrishna Weaving Mills
-</div>
+    <!-- NAVBAR -->
+    <header class="navbar">
+        <a href="/login" class="navbar-brand">
+            <img src="/static/logo_white.png" alt="Jaikrishna Weaving Mills Logo">
+            <span>Jaikrishna Weaving Mills</span>
+        </a>
+        <a href="/login" class="nav-link-back">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Back to Gateway</span>
+        </a>
+    </header>
 
-<div class="login-card">
-    <h2>{{ role_title }} Login</h2>
-    <a href="/login" style="display: block; margin-bottom: 20px; color: #1b6f7a; text-decoration: none; font-size: 14px; font-weight: bold; text-align: center;">← Back to Portals</a>
+    <!-- LOGIN FORM -->
+    <main class="login-container">
+        
+        <div class="login-card">
+            
+            <div class="card-header-badge">
+                <span class="role-pill">
+                    {% if role_title == 'Admin' %}
+                    <i class="fa-solid fa-user-shield"></i>
+                    {% else %}
+                    <i class="fa-solid fa-industry"></i>
+                    {% endif %}
+                    {{ role_title }} Mode
+                </span>
+                <div class="ssl-indicator">
+                    <i class="fa-solid fa-lock"></i>
+                    <span>Protected</span>
+                </div>
+            </div>
 
-    <!-- TOAST POPUP (TOP RIGHT) IN CARD -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 10px; border-radius: 4px; margin-bottom: 20px; text-align: center; font-size: 14px;">
-            {{ message }}
-          </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+            <h1 class="login-title">{{ role_title }} Login</h1>
+            <p class="login-desc">Enter your credentials to access the system.</p>
 
-    <form method="POST">
-        <input type="text" name="username" placeholder="Username" required>
+            <!-- Flash Error Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="alert-danger">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span>{{ message }}</span>
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
 
-        <div class="password-box">
-            <input type="password" id="password" name="password" placeholder="Password" required>
-            <span class="eye" onclick="togglePassword()">👁</span>
+            <form method="POST" autocomplete="off">
+                <div class="form-group">
+                    <label class="form-label" for="username">Username</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-user input-icon"></i>
+                        <input type="text" id="username" name="username" class="form-input" placeholder="Enter {{ role_title }} username" required autofocus>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-lock input-icon"></i>
+                        <input type="password" id="password" name="password" class="form-input" placeholder="Enter password" required>
+                        <span class="eye-toggle" onclick="togglePassword()" id="eyeBtn" title="Toggle password visibility">
+                            <i class="fa-regular fa-eye"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <button type="submit" class="login-btn" id="loginSubmitBtn">
+                    <span>Sign In to {{ role_title }}</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <div class="back-link-wrapper">
+                <a href="/login" class="back-link">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Return to Portal Gateway</span>
+                </a>
+            </div>
+
         </div>
 
-        <button type="submit">Login</button>
-    </form>
-</div>
+    </main>
 
-<script>
-function togglePassword() {
-    const pwd = document.getElementById("password");
-    pwd.type = pwd.type === "password" ? "text" : "password";
-}
-</script>
+    <!-- FOOTER -->
+    <footer class="gateway-footer">
+        <div class="footer-content">
+            <div>
+                <strong>Jai Krishna Weaving Mills</strong> &nbsp;|&nbsp; 
+                1/501 - A1, Kallimedu Thottam, Paduvampalli, Sulur, Coimbatore - 641 659 &nbsp;|&nbsp; 
+                <strong>GSTIN:</strong> 33AAQFJ1452K1Z7
+            </div>
+            <div style="color: #9cb0b4; font-size: 11.5px;">
+                Authorized Mill Operations Platform • Phase II
+            </div>
+        </div>
+    </footer>
+
+    <script>
+    function togglePassword() {
+        const pwd = document.getElementById("password");
+        const eye = document.getElementById("eyeBtn");
+        if (pwd.type === "password") {
+            pwd.type = "text";
+            eye.innerHTML = '<i class="fa-regular fa-eye-slash"></i>';
+        } else {
+            pwd.type = "password";
+            eye.innerHTML = '<i class="fa-regular fa-eye"></i>';
+        }
+    }
+    </script>
 
 </body>
 </html>
