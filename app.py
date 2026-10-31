@@ -289,7 +289,7 @@ def bulk_daily_entry():
         run_times = request.form.getlist("run_time_hours[]")
 
         inserted_count = 0
-        skipped_count = 0
+        updated_count = 0
 
         for i in range(len(looms)):
             worker = workers[i].strip() if i < len(workers) and workers[i] else ""
@@ -308,36 +308,45 @@ def bulk_daily_entry():
                 if run_time < 0 or run_time > 24:
                     run_time = 12.0
 
-                # Check duplicate entry for this worker, date and shift
+                # Check if this loom already has an entry recorded for this date and shift
                 cursor.execute("""
-                    SELECT COUNT(*) FROM daily_output
-                    WHERE worker_name=? AND date=? AND shift=?
-                """, (worker, entry_date, shift))
+                    SELECT record_id FROM daily_output
+                    WHERE loom_number=? AND date=? AND shift=?
+                """, (loom, entry_date, shift))
+                existing_row = cursor.fetchone()
 
-                if cursor.fetchone()[0] > 0:
-                    skipped_count += 1
-                    continue
-
-                cursor.execute("""
-                    INSERT INTO daily_output
-                    (worker_name, loom_number, date, shift, output_quantity, run_time_hours)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                """, (worker, loom, entry_date, shift, output, run_time))
-                inserted_count += 1
+                if existing_row:
+                    # Update existing record for this loom
+                    cursor.execute("""
+                        UPDATE daily_output
+                        SET worker_name=?, output_quantity=?, run_time_hours=?
+                        WHERE record_id=?
+                    """, (worker, output, run_time, existing_row[0]))
+                    updated_count += 1
+                else:
+                    # Insert new record for this loom
+                    cursor.execute("""
+                        INSERT INTO daily_output
+                        (worker_name, loom_number, date, shift, output_quantity, run_time_hours)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                    """, (worker, loom, entry_date, shift, output, run_time))
+                    inserted_count += 1
 
             except Exception as e:
-                print(f"Error inserting bulk row for loom {loom_str}: {e}")
+                print(f"Error saving bulk row for loom {loom_str}: {e}")
 
         conn.commit()
         conn.close()
 
-        if inserted_count > 0:
-            msg = f"Successfully saved {inserted_count} loom entries for {entry_date} ({shift} Shift)."
-            if skipped_count > 0:
-                msg += f" ({skipped_count} duplicate worker entries skipped)."
+        total_saved = inserted_count + updated_count
+        if total_saved > 0:
+            if inserted_count > 0 and updated_count > 0:
+                msg = f"Successfully processed {total_saved} loom entries ({inserted_count} new, {updated_count} updated) for {entry_date} ({shift} Shift)."
+            elif inserted_count > 0:
+                msg = f"Successfully saved {inserted_count} loom entries for {entry_date} ({shift} Shift)."
+            else:
+                msg = f"Successfully updated {updated_count} loom entries for {entry_date} ({shift} Shift)."
             flash(msg, "success")
-        elif skipped_count > 0:
-            flash(f"No new entries saved. {skipped_count} duplicate worker entries were skipped.", "warning")
         else:
             flash("No entries submitted. Please select a worker and enter meters for at least one loom.", "danger")
 
@@ -432,18 +441,18 @@ def daily_entry():
 
         output = int(output)
 
-        # DUPLICATE ENTRY CHECK
+        # DUPLICATE ENTRY CHECK: A loom can only have one production entry per date and shift
         cursor.execute(
             """
             SELECT COUNT(*) FROM daily_output
-            WHERE worker_name=? AND date=? AND shift=?
+            WHERE loom_number=? AND date=? AND shift=?
             """,
-            (worker, date, shift)
+            (loom, date, shift)
         )
 
         if cursor.fetchone()[0] > 0:
             conn.close()
-            flash("Duplicate entry not allowed for this worker, date and shift.", "danger")
+            flash(f"Loom {loom} already has an entry recorded for {date} ({shift} Shift).", "danger")
             return redirect(url_for("daily_entry"))
 
         # Parse and validate run_time

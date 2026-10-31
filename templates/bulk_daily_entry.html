@@ -61,7 +61,7 @@
             <div>
                 <strong style="color: var(--primary); font-size: 15px;">Loom Gang / Block Allocator</strong>
                 <span style="font-size: 12.5px; color: var(--text-muted); margin-left: 6px;">
-                    Assign 1 weaver to a set of looms (e.g., 4 to 8 looms). Already recorded looms are protected.
+                    Assign 1 weaver to a set of looms (e.g., 4 to 8 looms).
                 </span>
             </div>
         </div>
@@ -251,35 +251,34 @@
         }
 
         let assignedCount = 0;
-        let protectedRecordedCount = 0;
+        let firstRow = null;
         const rows = document.querySelectorAll('.matrix-row');
         rows.forEach(row => {
             const loomNum = parseInt(row.getAttribute('data-loom'), 10);
             if (loomNum >= fromLoom && loomNum <= toLoom) {
-                const isRecorded = row.getAttribute('data-is-recorded') === 'true';
-                
-                // Do not overwrite already recorded database records with a bulk range sweep!
-                if (isRecorded) {
-                    protectedRecordedCount++;
-                    return;
-                }
-
                 const select = row.querySelector('.matrix-worker-select');
                 if (select) {
                     select.value = workerName;
                     updateRowStatus(row, workerName);
                     triggerHighlight(row);
+                    if (!firstRow) firstRow = row;
                     assignedCount++;
                 }
             }
         });
 
-        let msg = `Assigned "${workerName}" to ${assignedCount} looms (Loom ${fromLoom} - ${toLoom}).`;
-        if (protectedRecordedCount > 0) {
-            msg += ` (${protectedRecordedCount} already recorded looms were kept protected).`;
+        if (assignedCount === 0) {
+            alert(`No active looms found in the matrix for range Loom ${fromLoom} to Loom ${toLoom}. Please verify loom numbers.`);
+            showAllocatorFeedback(`No looms found in range ${fromLoom} - ${toLoom}.`, true);
+            return;
         }
-        showAllocatorFeedback(msg);
+
+        showAllocatorFeedback(`Assigned "${workerName}" to ${assignedCount} looms (Loom ${fromLoom} - ${toLoom}).`);
         updateActiveCount();
+
+        if (firstRow) {
+            firstRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
     }
 
     // 2. ASSIGN WORKER TO CHECKED LOOMS
@@ -300,6 +299,7 @@
         }
 
         let assignedCount = 0;
+        let firstRow = null;
         checkedBoxes.forEach(box => {
             const row = box.closest('.matrix-row');
             if (row) {
@@ -308,6 +308,7 @@
                     select.value = workerName;
                     updateRowStatus(row, workerName);
                     triggerHighlight(row);
+                    if (!firstRow) firstRow = row;
                     assignedCount++;
                 }
                 box.checked = false;
@@ -318,6 +319,10 @@
         updateCheckedCount();
         showAllocatorFeedback(`Assigned "${workerName}" to ${assignedCount} selected looms.`);
         updateActiveCount();
+
+        if (firstRow) {
+            firstRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
     }
 
     // 3. OPTIONAL "COPY LAST SHIFT ROSTER" (Only fills unrecorded looms!)
@@ -489,13 +494,18 @@
         row.classList.add('row-highlight');
     }
 
-    function showAllocatorFeedback(msg) {
+    function showAllocatorFeedback(msg, isError = false) {
         const fb = document.getElementById('allocatorFeedback');
-        fb.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${msg}`;
+        if (!fb) return;
+        if (isError) {
+            fb.innerHTML = `<span style="background: #fdf2f2; border: 1px solid #f8b4b4; color: #9b1c1c; padding: 4px 10px; border-radius: 6px;"><i class="fa-solid fa-triangle-exclamation"></i> ${msg}</span>`;
+        } else {
+            fb.innerHTML = `<span style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 4px 10px; border-radius: 6px;"><i class="fa-solid fa-circle-check"></i> ${msg}</span>`;
+        }
         fb.style.display = 'block';
         setTimeout(() => {
             fb.style.display = 'none';
-        }, 4500);
+        }, 5000);
     }
 
     function updateActiveCount() {
