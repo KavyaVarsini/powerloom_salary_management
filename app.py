@@ -13,9 +13,15 @@ from ml_insights import get_loom_anomalies, forecast_worker_weekly_production
 load_dotenv()
 
 def backup_database():
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    backup_file = f"backup/powerloom_backup_{timestamp}.db"
-    shutil.copy("powerloom.db", backup_file)
+    try:
+        if not os.path.exists("powerloom.db"):
+            return
+        os.makedirs("backup", exist_ok=True)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        backup_file = f"backup/powerloom_backup_{timestamp}.db"
+        shutil.copy("powerloom.db", backup_file)
+    except Exception as e:
+        print(f"Database backup notice: {e}")
 
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "powerloom_secret_key")
@@ -23,10 +29,15 @@ app.secret_key = os.getenv("FLASK_SECRET_KEY", "powerloom_secret_key")
 last_backup_time = None
 
 
+from db_setup import setup_database
+
 def connect_db():
+    if not os.path.exists("powerloom.db"):
+        setup_database("powerloom.db")
     conn = sqlite3.connect("powerloom.db")
     conn.execute("PRAGMA foreign_keys = ON;")
     return conn
+
 
 from functools import wraps
 from werkzeug.security import check_password_hash
@@ -1845,4 +1856,7 @@ def logout():
 
 if __name__ == "__main__":
     backup_database()
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    debug_mode = os.environ.get("FLASK_DEBUG", "False").lower() in ("true", "1", "t")
+    app.run(host="0.0.0.0", port=port, debug=debug_mode)
+
