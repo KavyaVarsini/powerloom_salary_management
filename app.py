@@ -1802,6 +1802,14 @@ def weekly_salary_remove_deduction():
 def login_gateway():
     return render_template("login_gateway.html")
 
+@app.route("/demo-login")
+@app.route("/login/demo")
+def demo_login():
+    session["logged_in"] = True
+    session["role"] = "Admin"
+    flash("⚡ Welcome! Logged in with Full Admin Demo Access.", "success")
+    return redirect(url_for("home"))
+
 @app.route("/login/admin", methods=["GET", "POST"])
 def login_admin():
     if request.method == "POST":

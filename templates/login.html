@@ -313,6 +313,76 @@
             text-decoration: underline;
         }
 
+        /* DEMO & AUTOFILL HELPERS */
+        .demo-separator {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 22px 0 16px;
+            color: #8da2a6;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+        }
+
+        .demo-separator::before,
+        .demo-separator::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .demo-separator span {
+            padding: 0 10px;
+        }
+
+        .demo-direct-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #104f55 0%, #1b6f7a 100%);
+            color: #ffffff;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 2px 8px rgba(16, 79, 85, 0.2);
+            transition: all 0.2s ease;
+            margin-bottom: 10px;
+        }
+
+        .demo-direct-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 79, 85, 0.3);
+            color: #ffffff;
+        }
+
+        .autofill-btn {
+            width: 100%;
+            background-color: #f0f7f8;
+            color: var(--primary);
+            border: 1px solid #b5d5d8;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .autofill-btn:hover {
+            background-color: #e2f0f2;
+            border-color: var(--primary);
+        }
+
         /* FOOTER */
         .gateway-footer {
             background: #ffffff;
@@ -407,6 +477,20 @@
                     <span>Sign In to {{ role_title }}</span>
                     <i class="fa-solid fa-arrow-right"></i>
                 </button>
+
+                <div class="demo-separator">
+                    <span>PORTFOLIO REVIEWER QUICK ACCESS</span>
+                </div>
+
+                <a href="/demo-login" class="demo-direct-btn" id="quickDemoBtn">
+                    <i class="fa-solid fa-bolt"></i>
+                    <span>⚡ One-Click Admin Demo Login</span>
+                </a>
+
+                <button type="button" class="autofill-btn" id="autoFillBtn" onclick="fillDemoCredentials()">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>Auto-fill {{ role_title }} Credentials</span>
+                </button>
             </form>
 
             <div class="back-link-wrapper">
@@ -444,6 +528,19 @@
         } else {
             pwd.type = "password";
             eye.innerHTML = '<i class="fa-regular fa-eye"></i>';
+        }
+    }
+
+    function fillDemoCredentials() {
+        const role = "{{ role_title }}";
+        const userField = document.getElementById("username");
+        const passField = document.getElementById("password");
+        if (role === "Admin") {
+            userField.value = "jkt_textiles";
+            passField.value = "jotheeskavi";
+        } else {
+            userField.value = "jkt_supervisor";
+            passField.value = "supervisorpass";
         }
     }
     </script>
