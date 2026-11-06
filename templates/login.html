@@ -484,13 +484,8 @@
 
                 <a href="/demo-login" class="demo-direct-btn" id="quickDemoBtn">
                     <i class="fa-solid fa-bolt"></i>
-                    <span>⚡ One-Click Admin Demo Login</span>
+                    <span>⚡ One-Click Recruiter Demo Login</span>
                 </a>
-
-                <button type="button" class="autofill-btn" id="autoFillBtn" onclick="fillDemoCredentials()">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i>
-                    <span>Auto-fill {{ role_title }} Credentials</span>
-                </button>
             </form>
 
             <div class="back-link-wrapper">
@@ -528,19 +523,6 @@
         } else {
             pwd.type = "password";
             eye.innerHTML = '<i class="fa-regular fa-eye"></i>';
-        }
-    }
-
-    function fillDemoCredentials() {
-        const role = "{{ role_title }}";
-        const userField = document.getElementById("username");
-        const passField = document.getElementById("password");
-        if (role === "Admin") {
-            userField.value = "jkt_textiles";
-            passField.value = "jotheeskavi";
-        } else {
-            userField.value = "jkt_supervisor";
-            passField.value = "supervisorpass";
         }
     }
     </script>

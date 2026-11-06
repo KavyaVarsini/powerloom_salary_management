@@ -59,6 +59,35 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+# Endpoints where POST is strictly used for searching/filtering data without altering database
+SAFE_POST_ENDPOINTS = {
+    "weekly_salary",
+    "worker_production",
+    "worker_salary_report",
+    "daily_history"
+}
+
+# Endpoints where GET requests toggle or mutate database records
+MUTATING_GET_ENDPOINTS = {
+    "deactivate_worker",
+    "activate_worker",
+    "deactivate_loom",
+    "activate_loom"
+}
+
+@app.before_request
+def check_demo_restrictions():
+    if session.get("is_demo"):
+        endpoint = request.endpoint
+        # Block GET actions that toggle statuses
+        if endpoint in MUTATING_GET_ENDPOINTS:
+            flash("🔒 Demo Mode: Status toggling is disabled in guest preview to preserve data integrity.", "warning")
+            return redirect(request.referrer or url_for("home"))
+        # Block POST actions that insert, update, or delete records
+        if request.method == "POST" and endpoint not in SAFE_POST_ENDPOINTS:
+            flash("🔒 Demo Mode: Adding, editing, or deleting records is disabled in guest preview.", "warning")
+            return redirect(request.referrer or url_for("home"))
+
 from datetime import date, timedelta
 
 @app.route("/")
@@ -1807,7 +1836,9 @@ def login_gateway():
 def demo_login():
     session["logged_in"] = True
     session["role"] = "Admin"
-    flash("⚡ Welcome! Logged in with Full Admin Demo Access.", "success")
+    session["is_demo"] = True
+    session["username"] = "demo_reviewer"
+    flash("⚡ Welcome! Logged in as Recruiter Demo (Read-Only Preview with Data Protection).", "success")
     return redirect(url_for("home"))
 
 @app.route("/login/admin", methods=["GET", "POST"])
